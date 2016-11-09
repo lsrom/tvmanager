@@ -1,10 +1,9 @@
 package cz.lsrom.tvmanager.controller;
 
-import cz.lsrom.tvmanager.model.UIStarter;
+import cz.lsrom.tvmanager.UIStarter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,9 +16,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

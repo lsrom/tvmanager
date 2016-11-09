@@ -1,6 +1,6 @@
 package cz.lsrom.tvmanager.controller;
 
-import cz.lsrom.tvmanager.model.UIStarter;
+import cz.lsrom.tvmanager.UIStarter;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

@@ -1,4 +1,4 @@
-package cz.lsrom.tvmanager.model;
+package cz.lsrom.tvmanager;
 
 import cz.lsrom.tvmanager.controller.UIController;
 import javafx.application.Application;
