@@ -1,5 +1,6 @@
 package cz.lsrom.tvmanager.model;
 
+import cz.lsrom.tvmanager.controller.UIController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,7 +28,10 @@ public class UIStarter extends Application {
             e.printStackTrace();
         }
 
-        Scene scene = new Scene(root, 800, 450);
+        UIController mainController = new UIController();
+        mainController.setUiStarter(this);
+
+        Scene scene = new Scene(root, 1280, 640);
 
         primaryStage.setTitle("TV Manager");
         primaryStage.setScene(scene);
