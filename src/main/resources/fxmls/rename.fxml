@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.lsrom.tvmanager.controller.RenameController">
+    <children>
+        <BorderPane prefHeight="180.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <top>
+                <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <items>
+                        <Button fx:id="btnAddFiles" mnemonicParsing="false" text="Add Files" />
+                        <Button fx:id="btnAddDirectories" mnemonicParsing="false" text="Add Directories" />
+                        <Button fx:id="btnClearAll" mnemonicParsing="false" text="Clear" />
+                        <Button fx:id="btnRename" mnemonicParsing="false" text="Rename" />
+                    </items>
+                </ToolBar>
+            </top>
+            <center>
+                <TableView fx:id="showList" prefHeight="140.0" prefWidth="600.0" tableMenuButtonVisible="true" BorderPane.alignment="CENTER">
+                    <columns>
+                        <TableColumn prefWidth="300.0" text="Show" />
+                        <TableColumn prefWidth="300.0" text="Directory" />
+                        <TableColumn prefWidth="300.0" text="Original Name" />
+                        <TableColumn prefWidth="300.0" text="New Name" />
+                        <TableColumn prefWidth="80.0" text="Status" />
+                    </columns>
+                </TableView>
+            </center>
+        </BorderPane>
+    </children>
+</AnchorPane>
