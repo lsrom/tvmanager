@@ -8,6 +8,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import java.io.IOException;
 
@@ -28,8 +31,6 @@ public class UIController {
 
     @FXML
     private void initialize() {
-        System.out.println ("initialize");
-
         Parent tab = null;
 
         try {
@@ -44,13 +45,12 @@ public class UIController {
     }
 
     private void initializeBtnClose (){
-        btnClose.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Platform.exit();
-                System.exit(0);
-            }
+        btnClose.setOnAction(event -> {
+            Platform.exit();
+            System.exit(0);
         });
+
+        btnClose.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN));
     }
 
     private void initializeBtnAbout (){
