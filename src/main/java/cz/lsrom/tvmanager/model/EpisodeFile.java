@@ -10,13 +10,15 @@ public class EpisodeFile {
     private Integer season;
     private int episodeNum;
     private String resolution;
+    private String directory;
     private File file;
 
-    public EpisodeFile(String showName, Integer season, int episodeNum, String resolution, File file) {
+    public EpisodeFile(String showName, Integer season, int episodeNum, String resolution, String directory, File file) {
         this.showName = showName;
         this.season = season;
         this.episodeNum = episodeNum;
         this.resolution = resolution;
+        this.directory = directory;
         this.file = file;
     }
 
@@ -34,6 +36,10 @@ public class EpisodeFile {
 
     public String getResolution() {
         return resolution;
+    }
+
+    public String getDirectory() {
+        return directory;
     }
 
     public File getFile() {
@@ -54,6 +60,10 @@ public class EpisodeFile {
 
     public void setResolution(String resolution) {
         this.resolution = resolution;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
     }
 
     public void setFile(File file) {
@@ -90,6 +100,7 @@ public class EpisodeFile {
         sb.append(", season=").append(season);
         sb.append(", episodeNum=").append(episodeNum);
         sb.append(", resolution='").append(resolution).append('\'');
+        sb.append(", directory='").append(directory).append('\'');
         sb.append(", file=").append(file);
         sb.append('}');
         return sb.toString();
