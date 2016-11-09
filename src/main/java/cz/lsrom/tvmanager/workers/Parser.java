@@ -12,12 +12,12 @@ import java.util.regex.Pattern;
 public abstract class Parser {
     // regular expression to try on given filename
     private static final String[] REGEX = {
-        "(.+)\\W(\\d\\d\\d?).*",     // matches anime files (2 groups = show, episode)
-        "(.+?\\W\\D*?)[sS](\\d\\d?)[eE](\\d\\d?).*",    // matches normal shows (3 groups = show, season, episode)
+            "(.+)[\\Wa\\\\b](\\d\\d\\d)[\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
+            "(.+?\\W\\D*?)[sS](\\d\\d?)[eE](\\d\\d?).*",    // matches normal shows (3 groups = show, season, episode)
     };
 
     // regular expression to match resolution part of filename
-    private static final String RESOLUTION_REGEX = ".*(\\d{3,4}[p]|\\d[k]).*";
+    private static final String RESOLUTION_REGEX = ".*\\D(\\d+[pk]).*";
 
     // compiled regular expressions
     private static final Pattern[] COMPILED_REGEX = new Pattern[REGEX.length];

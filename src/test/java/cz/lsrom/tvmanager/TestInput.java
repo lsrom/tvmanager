@@ -10,14 +10,16 @@ public class TestInput {
     public final String showName;
     public final Integer season;
     public final int episodeNum;
+    public final String episodeTitle;
     public final String resolution;
     public final String directory;
 
-    public TestInput(File input, String showName, Integer season, int episodeNum, String resolution, String directory) {
+    public TestInput(File input, String showName, Integer season, int episodeNum, String episodeTitle, String resolution, String directory) {
         this.input = input;
         this.showName = showName;
         this.season = season;
         this.episodeNum = episodeNum;
+        this.episodeTitle = episodeTitle;
         this.resolution = resolution;
         this.directory = directory;
     }
