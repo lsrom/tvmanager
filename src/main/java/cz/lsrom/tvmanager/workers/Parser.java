@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public abstract class Parser {
     // regular expression to try on given filename
     private static final String[] REGEX = {
-            "(.+)[\\Wa\\\\b](\\d\\d\\d)[\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
+            "(.+)[\\D\\Wa\\\\b](\\d\\d\\d)[\\D\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
             "(.+?\\W\\D*?)[sS](\\d\\d?)[eE](\\d\\d?).*",    // matches normal shows (3 groups = show, season, episode)
     };
 
@@ -127,6 +127,12 @@ public abstract class Parser {
         if (hasMultipleOccurrences(output, '_')){
             output = output.replaceAll("_", " ");
         }
+
+        // remove junk substrings
+        output = output.replace("x264", "");
+        output = output.replace("X264", "");
+        output = output.replace("x265", "");
+        output = output.replace("X265", "");
 
         // remove empty brackets
         output = output.replaceAll("\\[\\]", "");
