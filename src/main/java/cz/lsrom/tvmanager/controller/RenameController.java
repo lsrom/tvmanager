@@ -1,10 +1,16 @@
 package cz.lsrom.tvmanager.controller;
 
 import cz.lsrom.tvmanager.UIStarter;
+import cz.lsrom.tvmanager.model.EpisodeFile;
+import cz.lsrom.tvmanager.workers.Parser;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,8 +22,10 @@ import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by lsrom on 11/9/16.
@@ -30,6 +38,7 @@ public class RenameController {
     @FXML private Button btnRename;
 
     private List<File> filesToRename;
+    private List<EpisodeFile> episodeFileList;
 
     UIStarter uiStarter;
 
@@ -53,13 +62,45 @@ public class RenameController {
             return;
         }
 
+        // here we'll put all episode files -> this will be the data for the table
         ObservableList<ObservableList> data = FXCollections.observableArrayList();
-        ObservableList<String> row = FXCollections.observableArrayList();
 
-        row.addAll("first", "second", "third", "forth", "fifth");
-        data.add(row);
+        // this task will run asynchronously so UI thread won't be frozen by parsing filenames
+        Task<List<EpisodeFile>> getEpisodeFiles = new Task<List<EpisodeFile>>() {
+            @Override
+            protected List<EpisodeFile> call() throws Exception {
+                List<EpisodeFile> list = new ArrayList<>();
 
-        showList.getItems().setAll(data);
+                for (File f : filesToRename){
+                    list.add(Parser.parse(f));
+                }
+
+                return list;
+            }
+        };
+
+        // set listener for when the task ends
+        getEpisodeFiles.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                for (EpisodeFile ef : getEpisodeFiles.getValue()){                          // iterate over all episodes
+                    ObservableList<String> row = FXCollections.observableArrayList();       // create new row so we don't overwrite the existing one
+                    row.setAll(ef.getShowName(),
+                            ef.getDirectory(),
+                            ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
+                            "TODO",                                                         // todo add new name
+                            "Running");                                                     // todo ?
+
+                    data.add(row);
+                }
+
+                showList.getItems().addAll(data);       // set all items to the table
+            }
+        });
+
+        Thread episodeGetter = new Thread(getEpisodeFiles);     // create new thread with the task
+        episodeGetter.setDaemon(true);
+        episodeGetter.start();
     }
 
     private void initializeBtnAddFiles (){
