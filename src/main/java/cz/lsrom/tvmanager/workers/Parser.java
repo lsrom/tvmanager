@@ -17,7 +17,7 @@ public abstract class Parser {
     };
 
     // regular expression to match resolution part of filename
-    private static final String RESOLUTION_REGEX = "(\\d{1,4}[pk])";
+    private static final String RESOLUTION_REGEX = ".*(\\d{3,4}[p]|\\d[k]).*";
 
     // compiled regular expressions
     private static final Pattern[] COMPILED_REGEX = new Pattern[REGEX.length];
@@ -33,7 +33,7 @@ public abstract class Parser {
     public static EpisodeFile parse (File episodeFile){
         String fileName = stripJunk(episodeFile.getName());     // strip junk chars and strings from filename
 
-        String directory = episodeFile.getParent();
+        String directory = episodeFile.getParent() == null ? "" : episodeFile.getParent();
         String showTitle = "";
         int season = -1;
         int episode = -1;
@@ -80,8 +80,6 @@ public abstract class Parser {
                         break;
                 }
             }
-
-            lastMatchCount = 0;
         }
 
         // return EpisodeFile with the values we've got
@@ -156,7 +154,7 @@ public abstract class Parser {
         String output = input;
 
         // remove ending substring if it is not a word character
-        if (output.matches("[\\W_]+$")){
+        if (output.matches(".*[\\W_]+$")){
             output = output.replaceAll("[\\W_]+$", "");
         }
 
