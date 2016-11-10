@@ -7,14 +7,14 @@ import java.util.List;
  */
 public class Show {
     private String title;
-    private List<Season> seasons;
+    private List<Episode> episodes;
     private String id;
     private String overview;
     private String status;
 
-    public Show(String title, List<Season> seasons, String id, String overview, String status) {
+    public Show(String title, List<Episode> episodes, String id, String overview, String status) {
         this.title = title;
-        this.seasons = seasons;
+        this.episodes = episodes;
         this.id = id;
         this.overview = overview;
         this.status = status;
@@ -24,8 +24,8 @@ public class Show {
         return title;
     }
 
-    public List<Season> getSeasons() {
-        return seasons;
+    public List<Episode> getEpisodes() {
+        return episodes;
     }
 
     public String getId() {
@@ -44,8 +44,8 @@ public class Show {
         this.title = title;
     }
 
-    public void setSeasons(List<Season> seasons) {
-        this.seasons = seasons;
+    public void setEpisodes(List<Episode> episodes) {
+        this.episodes = episodes;
     }
 
     public void setId(String id) {
@@ -85,7 +85,7 @@ public class Show {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Show{");
         sb.append("title='").append(title).append('\'');
-        sb.append(", seasons=").append(seasons);
+        sb.append(", episodes=").append(episodes);
         sb.append(", id='").append(id).append('\'');
         sb.append(", overview='").append(overview).append('\'');
         sb.append(", status='").append(status).append('\'');
