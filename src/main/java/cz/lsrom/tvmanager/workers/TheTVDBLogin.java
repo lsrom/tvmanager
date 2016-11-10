@@ -1,5 +1,7 @@
 package cz.lsrom.tvmanager.workers;
 
+import com.sun.istack.internal.NotNull;
+
 /**
  * This class is the holder of TheTVDB login information. TheTVDB API requires application to login before it can make
  * request against this API. This object is created with application API Key and converted to JSON for sending to TheTVD
@@ -23,7 +25,7 @@ public class TheTVDBLogin {
      * @param username Can be left blank.
      * @param userkey Can be left blank.
      */
-    public TheTVDBLogin(String apikey, String username, String userkey) {
+    public TheTVDBLogin(@NotNull String apikey, String username, String userkey) {
         this.apikey = apikey;
         this.username = username;
         this.userkey = userkey;
