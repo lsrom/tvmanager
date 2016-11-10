@@ -1,5 +1,7 @@
 package cz.lsrom.tvmanager.workers;
 
+import com.sun.istack.internal.NotNull;
+
 /**
  * Holds the JWT token from TheTVDB API. Token expires after 24 hours.
  * @see <url>https://api.thetvdb.com/swagger#/Authentication</url>
@@ -12,7 +14,7 @@ public class JWTToken {
      * Create new token holder with token value.
      * @param token JWT token string from TheTVDB authentication process.
      */
-    public JWTToken(String token) {
+    public JWTToken(@NotNull String token) {
         this.token = token;
     }
 
