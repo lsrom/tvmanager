@@ -5,6 +5,8 @@ import com.eclipsesource.json.JsonObject;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import cz.lsrom.tvmanager.model.Show;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.*;
@@ -13,6 +15,8 @@ import java.net.*;
  * Created by lsrom on 11/10/16.
  */
 public class TheTVDBProvider {
+    private static Logger logger = LoggerFactory.getLogger(TheTVDBProvider.class);
+
     private static final String THETVDB_API_KEY = "FA55DD7926C17088";   // API key received from TheTVDB that should be used with this application
     private static final String BASE_URL = "https://api.thetvdb.com/";  // API URL of TheTVDB
     private static final String LOGIN_URL = BASE_URL + "login";         // on this URL application should attempt to login
@@ -43,7 +47,7 @@ public class TheTVDBProvider {
         try {
             tokenJson = connect(LOGIN_URL, null);   // try to acquire token json
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         JWTToken token = gson.fromJson(tokenJson, JWTToken.class);  // parse JSON with token into JWTToken object
@@ -71,9 +75,9 @@ public class TheTVDBProvider {
             String urlEncodeShow = URLEncoder.encode(showTitle.toLowerCase(), "UTF-8");     // encode show title in lowercase
             showResult = connect(SEARCH_FOR_SHOW_URL + urlEncodeShow, token.getToken());    // get JSON response
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         // parse response to new Show object
@@ -149,10 +153,10 @@ public class TheTVDBProvider {
         // check for response code
         switch (http.getResponseCode()){
             case RESPONSE_CODE_TOKEN_INVALID:   // token is missing or has expired
-                // todo log
+                logger.warn("JWT token missing or expired.");
                 break;
             case RESPONSE_CODE_NOT_FOUND:       // show was not found
-                // todo log
+                logger.warn("TV show {} not found. Response: {}.", url, RESPONSE_CODE_NOT_FOUND);
                 return "";
         }
 
@@ -160,7 +164,7 @@ public class TheTVDBProvider {
         try (InputStream is = http.getInputStream()){
             return getStringFromInputStream(is);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         // if something went wrong return empty string
