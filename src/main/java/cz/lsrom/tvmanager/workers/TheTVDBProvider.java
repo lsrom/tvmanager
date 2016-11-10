@@ -115,45 +115,63 @@ public class TheTVDBProvider {
         return parseJsonToShow(showResult);
     }
 
-    public List<Episode> getAllEpisodesForShow (String showId){
-        String query = GET_ALL_EPISODES.replace(ID_SUBSTRING, showId);
+    /**
+     * Returns all episodes for given show or empty list of there was a problem. If given show ID is null or empty,
+     * then this method returns empty list.
+     *
+     * @implNote TheTVDB API returns results in pages - one page is 100 results. If there is more than one page, it is
+     * specified in 'links' field of JSON response where is number of the next page. This method loops through all pages.
+     * @param showId TheTVDB ID of the show.
+     * @return List with all episodes for the show or empty list.
+     */
+    public List<Episode> getAllEpisodesForShow (@NotNull String showId){
         List<Episode> list = new ArrayList<>();
+
+        if (showId == null || showId.isEmpty()){    // check for correct show id
+            return list;
+        }
+
+        String query = GET_ALL_EPISODES.replace(ID_SUBSTRING, showId);  // add show id to query string
         String page = "";
         String next = "";
 
-        do {
+        do {    // this loop is running until there are no more pages with episodes
             String episodes = "";
             try {
-                episodes = connect(query + page, token.getToken());
+                query.replaceAll("\\?page=$", "");                  // get rid of old page
+                episodes = connect(query + page, token.getToken()); // connect and get first page of results
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
 
-            if (episodes == null || episodes.isEmpty()){
+            if (episodes == null || episodes.isEmpty()){    // if there is no result, return empty list
                 return list;
             }
 
+            // check if there are more pages with results
             JsonObject links = Json.parse(episodes).asObject().get("links").asObject();
+            // if value of next is number that means there is another page with episodes for this show
             next = links.get(JSON_LINKS_NEXT).toString();
 
-            if (next.matches("\\d+")){
-                page = "?page=" + next;
+            if (next.matches("\\d+")){      // if 'next' is number it's the number of the next page
+                page = "?page=" + next;     // this string will appended to query
             }
 
-            JsonArray data = Json.parse(episodes).asObject().get("data").asArray();
+            JsonArray data = Json.parse(episodes).asObject().get("data").asArray(); // get data with episodes
 
             try {
-                for (JsonValue value : data){
+                for (JsonValue value : data){       // parse every episode
                     Episode e = parseJsonToEpisode(value);
+                    // if episode doesn't have absolute number, than it's not show episode
                     if (e.getAbsoluteEpisodeNumber() == -1){ continue; }
                     list.add(e);
                 }
             } catch (ParseException e) {
                 logger.error(e.getMessage());
             }
-        } while (!next.equals("null"));
+        } while (!next.equals("null"));     // repeat until there is no more pages
 
-        // sort the episode list
+        // sort the episode list, for easier searching
         Collections.sort(list);
 
         return list;
@@ -277,6 +295,14 @@ public class TheTVDBProvider {
         return new Show(showTitle, null, id, overview, status);
     }
 
+    /**
+     * Converts JSON string to Episode object. If some field of Episode object cannot be set, it is left with default
+     * value. Default value for strings is empty and for integers -1.
+     *
+     * @param value JSON string which will be converted to Episode.
+     * @return New Episode object with fields set to value retrieved from TheTVDB or default.
+     * @throws ParseException When strings from JSON representing numbers cannot be parsed.
+     */
     private static Episode parseJsonToEpisode (@NotNull JsonValue value) throws ParseException {
         String title = null;
         int episodeNumber = -1;
@@ -288,7 +314,7 @@ public class TheTVDBProvider {
         Date airDate = null;
         int episodeId = -1;
 
-        String tmp;
+        String tmp;     // variable for holding integer values before parsing
         title = value.asObject().getString(JSON_EPISODE_TITLE, "").trim();
 
         tmp = value.asObject().get(JSON_EPISODE_NUMBER).toString();
