@@ -15,7 +15,11 @@ public class TheTVDBProvider {
     private static final String THETVDB_API_KEY = "FA55DD7926C17088";
     private static final String LOGIN_URL = "https://api.thetvdb.com/login";
 
-    private static JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
+    private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
+
+    public TheTVDBProvider(JWTToken token) {
+        this.token = token;
+    }
 
     /**
      * This method will retrieve the JWT token from TheTVDB server. It has to be called before any calls to
@@ -66,6 +70,8 @@ public class TheTVDBProvider {
                 e.printStackTrace();
             }
 
+            JWTToken token = null;     // new token object for holding the token value
+
             // read and parse response from TheTVDB with the JWT token
             try (InputStream is = http.getInputStream()){
                 Gson tokenJSon = new Gson();
@@ -77,11 +83,17 @@ public class TheTVDBProvider {
             }
 
             // if all went well and the token is set, return new TVDBProvider object
-            return new TheTVDBProvider();
+            if (token != null){
+                return new TheTVDBProvider(token);
+            }
         }
 
         // if something went wrong and we didn't acquire the JWT token, return null;
         return null;
+    }
+
+    public JWTToken getToken() {
+        return token;
     }
 
     /**
@@ -100,29 +112,5 @@ public class TheTVDBProvider {
             result.write(buffer, 0, length);
         }
         return result.toString("UTF-8");
-    }
-
-    /**
-     * Holds the JWT token from TheTVDB API. Token expires after 24 hours.
-     * @see <url>https://api.thetvdb.com/swagger#/Authentication</url>
-     */
-    private class JWTToken {
-        private String token;   // string with token
-
-        /**
-         * Create new token holder with token value.
-         * @param token JWT token string from TheTVDB authentication process.
-         */
-        public JWTToken(String token) {
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
-        }
     }
 }
