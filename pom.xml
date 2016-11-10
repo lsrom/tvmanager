@@ -27,6 +27,13 @@
             <version>2.8.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.eclipsesource.minimal-json/minimal-json -->
+        <dependency>
+            <groupId>com.eclipsesource.minimal-json</groupId>
+            <artifactId>minimal-json</artifactId>
+            <version>0.9.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
