@@ -32,6 +32,14 @@ public class Show {
         return id;
     }
 
+    public String getOverview() {
+        return overview;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -44,6 +52,14 @@ public class Show {
         this.id = id;
     }
 
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,7 +68,8 @@ public class Show {
         Show show = (Show) o;
 
         if (!title.equals(show.title)) return false;
-        return id.equals(show.id);
+        if (!id.equals(show.id)) return false;
+        return status.equals(show.status);
 
     }
 
@@ -60,6 +77,7 @@ public class Show {
     public int hashCode() {
         int result = title.hashCode();
         result = 31 * result + id.hashCode();
+        result = 31 * result + status.hashCode();
         return result;
     }
 
@@ -69,6 +87,8 @@ public class Show {
         sb.append("title='").append(title).append('\'');
         sb.append(", seasons=").append(seasons);
         sb.append(", id='").append(id).append('\'');
+        sb.append(", overview='").append(overview).append('\'');
+        sb.append(", status='").append(status).append('\'');
         sb.append('}');
         return sb.toString();
     }
