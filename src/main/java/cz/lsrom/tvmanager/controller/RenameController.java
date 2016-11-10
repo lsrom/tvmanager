@@ -1,22 +1,24 @@
 package cz.lsrom.tvmanager.controller;
 
-import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.model.EpisodeFile;
 import cz.lsrom.tvmanager.workers.Parser;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
@@ -25,7 +27,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by lsrom on 11/9/16.
@@ -40,21 +41,17 @@ public class RenameController {
     private List<File> filesToRename;
     private List<EpisodeFile> episodeFileList;
 
-    UIStarter uiStarter;
-
-    public void setUiStarter (UIStarter uiStarter){
-        this.uiStarter = uiStarter;
-    }
 
     @FXML
     private void initialize() {
-        System.out.println ("rename controller");
-
+        initializeTable();
         setColumnWidth();
         setColumnValueFactory();
 
         initializeBtnAddFiles();
         initializeBtnAddDirectories();
+
+        //initializeKeyboardShortcuts();
     }
 
     private void populateViewWithItems (){
@@ -89,7 +86,7 @@ public class RenameController {
                             ef.getDirectory(),
                             ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
                             "TODO",                                                         // todo add new name
-                            "Running");                                                     // todo ?
+                            "Downloading");                                                     // todo ?
 
                     data.add(row);
                 }
@@ -135,15 +132,19 @@ public class RenameController {
 
     private void initializeBtnRename (){}
 
+    private void initializeTable (){
+        showList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);  // enable multi row selection
+    }
+
     private void setColumnWidth (){
         ObservableList<TableColumn> columns = showList.getColumns();
 
         // set width of columns - works even when window is resized
-        columns.get(0).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
+        columns.get(0).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(12));
         columns.get(1).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
         columns.get(2).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
         columns.get(3).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
-        columns.get(4).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(4));
+        columns.get(4).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(7));
     }
 
     private void setColumnValueFactory (){
@@ -181,6 +182,25 @@ public class RenameController {
             @Override
             public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
                 return new SimpleStringProperty(param.getValue().get(4));
+            }
+        });
+    }
+
+
+
+    private void initializeKeyboardShortcuts (){
+        final KeyCombination openFiles = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN);
+        final KeyCombination openDir = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
+
+
+        showList.getScene().addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                System.out.println ("event");
+                if (openFiles.match(event)){
+                    System.out.println ("match");
+                    btnAddFiles.fire();
+                }
             }
         });
     }

@@ -19,7 +19,7 @@
                 </ToolBar>
             </top>
             <center>
-                <TableView fx:id="showList" prefHeight="140.0" prefWidth="600.0" tableMenuButtonVisible="true" BorderPane.alignment="CENTER">
+                <TableView fx:id="showList" prefHeight="140.0" prefWidth="600.0" tableMenuButtonVisible="false" BorderPane.alignment="CENTER">
                     <columns>
                         <TableColumn prefWidth="300.0" text="Show" />
                         <TableColumn prefWidth="300.0" text="Directory" />
