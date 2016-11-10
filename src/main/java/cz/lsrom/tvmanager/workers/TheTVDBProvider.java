@@ -22,6 +22,11 @@ public class TheTVDBProvider {
     private static final String LOGIN_URL = BASE_URL + "login";         // on this URL application should attempt to login
     private static final String SEARCH_FOR_SHOW_URL = BASE_URL + "search/series?name="; // on this URL application can search for show using their name
 
+    private static final String JSON_RESPONSE_ID = "id";
+    private static final String JSON_RESPONSE_TITLE = "seriesName";
+    private static final String JSON_RESPONSE_OVERVIEW = "overview";
+    private static final String JSON_RESPONSE_STATUS = "status";
+
     private static final int RESPONSE_CODE_TOKEN_INVALID = 401;
     private static final int RESPONSE_CODE_NOT_FOUND = 404;
 
@@ -193,10 +198,10 @@ public class TheTVDBProvider {
         // parse JSON and get only the first array in data as that's the one holding the required information
         JsonObject metadata = Json.parse(jsonShow).asObject().get("data").asArray().get(0).asObject();
 
-        showTitle = metadata.getString("seriesName", "");
-        id = String.valueOf(metadata.get("id").asInt());    // can't be returned as string since it'S stored as int
-        overview = metadata.getString("overview", "");
-        status = metadata.getString("status", "");
+        showTitle = metadata.getString(JSON_RESPONSE_TITLE, "");
+        id = String.valueOf(metadata.get(JSON_RESPONSE_ID).asInt());    // can't be returned as string since it'S stored as int
+        overview = metadata.getString(JSON_RESPONSE_OVERVIEW, "");
+        status = metadata.getString(JSON_RESPONSE_STATUS, "");
 
         // create new show with values from JSON
         return new Show(showTitle, null, id, overview, status);
