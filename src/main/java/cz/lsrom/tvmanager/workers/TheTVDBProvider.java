@@ -1,15 +1,25 @@
 package cz.lsrom.tvmanager.workers;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
+import cz.lsrom.tvmanager.model.Episode;
 import cz.lsrom.tvmanager.model.Show;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by lsrom on 11/10/16.
@@ -21,14 +31,30 @@ public class TheTVDBProvider {
     private static final String BASE_URL = "https://api.thetvdb.com/";  // API URL of TheTVDB
     private static final String LOGIN_URL = BASE_URL + "login";         // on this URL application should attempt to login
     private static final String SEARCH_FOR_SHOW_URL = BASE_URL + "search/series?name="; // on this URL application can search for show using their name
+    private static final String ID_SUBSTRING = "_ID_";
+    private static final String GET_ALL_EPISODES = "https://api.thetvdb.com/series/" + ID_SUBSTRING + "/episodes";
 
-    private static final String JSON_RESPONSE_ID = "id";
-    private static final String JSON_RESPONSE_TITLE = "seriesName";
-    private static final String JSON_RESPONSE_OVERVIEW = "overview";
-    private static final String JSON_RESPONSE_STATUS = "status";
+    private static final String JSON_SHOW_ID = "id";
+    private static final String JSON_SHOW_TITLE = "seriesName";
+    private static final String JSON_SHOW_OVERVIEW = "overview";
+    private static final String JSON_SHOW_STATUS = "status";
+
+    private static final String JSON_EPISODE_TITLE = "episodeName";
+    private static final String JSON_EPISODE_NUMBER = "airedEpisodeNumber";
+    private static final String JSON_EPISODE_ABSOLUTE_NUMBER = "absoluteNumber";
+    private static final String JSON_EPISODE_DVD_NUMBER = "dvdEpisodeNumber";
+    private static final String JSON_EPISODE_SEASON = "airedSeason";
+    private static final String JSON_EPISODE_DVD_SEASON = "dvdSeason";
+    private static final String JSON_EPISODE_OVERVIEW = "overview";
+    private static final String JSON_EPISODE_AIRDATE = "firstAired";
+    private static final String JSON_EPISODE_ID = "id";
+
+    private static final String JSON_LINKS_NEXT = "next";
 
     private static final int RESPONSE_CODE_TOKEN_INVALID = 401;
     private static final int RESPONSE_CODE_NOT_FOUND = 404;
+
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
 
@@ -89,8 +115,52 @@ public class TheTVDBProvider {
         return parseJsonToShow(showResult);
     }
 
+    public List<Episode> getAllEpisodesForShow (String showId){
+        String query = GET_ALL_EPISODES.replace(ID_SUBSTRING, showId);
+        List<Episode> list = new ArrayList<>();
+        String page = "";
+        String next = "";
+
+        do {
+            String episodes = "";
+            try {
+                episodes = connect(query + page, token.getToken());
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+
+            if (episodes == null || episodes.isEmpty()){
+                return list;
+            }
+
+            JsonObject links = Json.parse(episodes).asObject().get("links").asObject();
+            next = links.get(JSON_LINKS_NEXT).toString();
+
+            if (next.matches("\\d+")){
+                page = "?page=" + next;
+            }
+
+            JsonArray data = Json.parse(episodes).asObject().get("data").asArray();
+
+            try {
+                for (JsonValue value : data){
+                    Episode e = parseJsonToEpisode(value);
+                    if (e.getAbsoluteEpisodeNumber() == -1){ continue; }
+                    list.add(e);
+                }
+            } catch (ParseException e) {
+                logger.error(e.getMessage());
+            }
+        } while (!next.equals("null"));
+
+        // sort the episode list
+        Collections.sort(list);
+
+        return list;
+    }
+
     /**
-     * Rreturns JWT token obtained from TheTVDB API. This token needs to be included in every request send to TheTVDB
+     * Returns JWT token obtained from TheTVDB API. This token needs to be included in every request send to TheTVDB
      * API server.
      *
      * @return JWTToken object with TheTVDB authorization token.
@@ -180,11 +250,11 @@ public class TheTVDBProvider {
      * Converts JSON data to Show object. If passed argument is null or empty, then it returns null as well.
      * Otherwise it will return new Show object with attributes id, title, overview and status set.
      *
-     * @param jsonShow String with JSON response from TheTVDB server.
+     * @param jsonData String with JSON response from TheTVDB server.
      * @return New Show object or null.
      */
-    private static Show parseJsonToShow (@NotNull String jsonShow){
-        if (jsonShow == null || jsonShow.isEmpty()){
+    private static Show parseJsonToShow (@NotNull String jsonData){
+        if (jsonData == null || jsonData.isEmpty()){
             return null;
         }
 
@@ -196,15 +266,60 @@ public class TheTVDBProvider {
         String status = null;
 
         // parse JSON and get only the first array in data as that's the one holding the required information
-        JsonObject metadata = Json.parse(jsonShow).asObject().get("data").asArray().get(0).asObject();
+        JsonObject metadata = Json.parse(jsonData).asObject().get("data").asArray().get(0).asObject();
 
-        showTitle = metadata.getString(JSON_RESPONSE_TITLE, "");
-        id = String.valueOf(metadata.get(JSON_RESPONSE_ID).asInt());    // can't be returned as string since it'S stored as int
-        overview = metadata.getString(JSON_RESPONSE_OVERVIEW, "");
-        status = metadata.getString(JSON_RESPONSE_STATUS, "");
+        showTitle = metadata.getString(JSON_SHOW_TITLE, "");
+        id = String.valueOf(metadata.get(JSON_SHOW_ID).asInt());    // can't be returned as string since it'S stored as int
+        overview = metadata.getString(JSON_SHOW_OVERVIEW, "");
+        status = metadata.getString(JSON_SHOW_STATUS, "");
 
         // create new show with values from JSON
         return new Show(showTitle, null, id, overview, status);
+    }
+
+    private static Episode parseJsonToEpisode (@NotNull JsonValue value) throws ParseException {
+        String title = null;
+        int episodeNumber = -1;
+        int dvdEpisodeNumber = -1;
+        int absoluteEpisodeNumber = -1;
+        int season = -1;
+        int dvdSeason = -1;
+        String overview = null;
+        Date airDate = null;
+        int episodeId = -1;
+
+        String tmp;
+        title = value.asObject().getString(JSON_EPISODE_TITLE, "").trim();
+
+        tmp = value.asObject().get(JSON_EPISODE_NUMBER).toString();
+        episodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+
+        tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).toString();
+        dvdEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+
+        tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).toString();
+        absoluteEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+
+        tmp = value.asObject().get(JSON_EPISODE_SEASON).toString();
+        season = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+
+        tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).toString();
+        dvdSeason = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+
+        overview = value.asObject().getString(JSON_EPISODE_OVERVIEW, "").trim();
+        airDate = dateFormat.parse(value.asObject().getString(JSON_EPISODE_AIRDATE, ""));
+        episodeId = value.asObject().getInt(JSON_EPISODE_ID, -1);
+
+        return new Episode(
+                title,
+                episodeNumber,
+                dvdEpisodeNumber,
+                absoluteEpisodeNumber,
+                season,
+                dvdSeason,
+                overview,
+                airDate,
+                episodeId);
     }
 
     /**
