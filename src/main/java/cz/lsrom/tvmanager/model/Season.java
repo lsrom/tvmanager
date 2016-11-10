@@ -7,15 +7,21 @@ import java.util.List;
  */
 public class Season {
     private int seasonNumber;
+    private int totalEpisodes;
     private List<Episode> episodes;
 
-    public Season(int seasonNumber, List<Episode> episodes) {
+    public Season(int seasonNumber, int totalEpisodes, List<Episode> episodes) {
         this.seasonNumber = seasonNumber;
+        this.totalEpisodes = totalEpisodes;
         this.episodes = episodes;
     }
 
     public int getSeasonNumber() {
         return seasonNumber;
+    }
+
+    public int getTotalEpisodes() {
+        return totalEpisodes;
     }
 
     public List<Episode> getEpisodes() {
@@ -24,6 +30,10 @@ public class Season {
 
     public void setSeasonNumber(int seasonNumber) {
         this.seasonNumber = seasonNumber;
+    }
+
+    public void setTotalEpisodes(int totalEpisodes) {
+        this.totalEpisodes = totalEpisodes;
     }
 
     public void setEpisodes(List<Episode> episodes) {
@@ -38,14 +48,16 @@ public class Season {
         Season season = (Season) o;
 
         if (seasonNumber != season.seasonNumber) return false;
-        return episodes.equals(season.episodes);
+        if (totalEpisodes != season.totalEpisodes) return false;
+        return !(episodes != null ? !episodes.equals(season.episodes) : season.episodes != null);
 
     }
 
     @Override
     public int hashCode() {
         int result = seasonNumber;
-        result = 31 * result + episodes.hashCode();
+        result = 31 * result + totalEpisodes;
+        result = 31 * result + (episodes != null ? episodes.hashCode() : 0);
         return result;
     }
 
@@ -53,6 +65,7 @@ public class Season {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Season{");
         sb.append("seasonNumber=").append(seasonNumber);
+        sb.append(", totalEpisodes=").append(totalEpisodes);
         sb.append(", episodes=").append(episodes);
         sb.append('}');
         return sb.toString();
