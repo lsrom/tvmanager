@@ -27,7 +27,7 @@ public class TheTVDBProvider {
 
     private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
 
-    public TheTVDBProvider(JWTToken token) {
+    private TheTVDBProvider(JWTToken token) {
         this.token = token;
     }
 
