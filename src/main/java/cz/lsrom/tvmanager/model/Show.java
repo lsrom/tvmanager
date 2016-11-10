@@ -9,11 +9,15 @@ public class Show {
     private String title;
     private List<Season> seasons;
     private String id;
+    private String overview;
+    private String status;
 
-    public Show(String title, List<Season> seasons, String id) {
+    public Show(String title, List<Season> seasons, String id, String overview, String status) {
         this.title = title;
         this.seasons = seasons;
         this.id = id;
+        this.overview = overview;
+        this.status = status;
     }
 
     public String getTitle() {
