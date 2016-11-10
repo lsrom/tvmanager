@@ -1,25 +1,33 @@
 package cz.lsrom.tvmanager.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Date;
 
 /**
  * Created by lsrom on 11/9/16.
  */
-public class Episode {
+public class Episode implements Comparable {
     private String title;
     private int episodeNumber;
+    private int dvdEpisodeNumber;
     private int absoluteEpisodeNumber;
-    private String resolution;
+    private int season;
+    private int dvdSeason;
     private String overview;
     private Date airDate;
+    private int episodeId;
 
-    public Episode(String title, int episodeNumber, int absoluteEpisodeNumber, String resolution, String overview, Date airDate) {
+    public Episode(String title, int episodeNumber, int dvdEpisodeNumber, int absoluteEpisodeNumber, int season, int dvdSeason, String overview, Date airDate, int episodeId) {
         this.title = title;
         this.episodeNumber = episodeNumber;
+        this.dvdEpisodeNumber = dvdEpisodeNumber;
         this.absoluteEpisodeNumber = absoluteEpisodeNumber;
-        this.resolution = resolution;
+        this.season = season;
+        this.dvdSeason = dvdSeason;
         this.overview = overview;
         this.airDate = airDate;
+        this.episodeId = episodeId;
     }
 
     public String getTitle() {
@@ -30,12 +38,20 @@ public class Episode {
         return episodeNumber;
     }
 
+    public int getDvdEpisodeNumber() {
+        return dvdEpisodeNumber;
+    }
+
     public int getAbsoluteEpisodeNumber() {
         return absoluteEpisodeNumber;
     }
 
-    public String getResolution() {
-        return resolution;
+    public int getSeason() {
+        return season;
+    }
+
+    public int getDvdSeason() {
+        return dvdSeason;
     }
 
     public String getOverview() {
@@ -46,6 +62,10 @@ public class Episode {
         return airDate;
     }
 
+    public int getEpisodeId() {
+        return episodeId;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -54,12 +74,20 @@ public class Episode {
         this.episodeNumber = episodeNumber;
     }
 
+    public void setDvdEpisodeNumber(int dvdEpisodeNumber) {
+        this.dvdEpisodeNumber = dvdEpisodeNumber;
+    }
+
     public void setAbsoluteEpisodeNumber(int absoluteEpisodeNumber) {
         this.absoluteEpisodeNumber = absoluteEpisodeNumber;
     }
 
-    public void setResolution(String resolution) {
-        this.resolution = resolution;
+    public void setSeason(int season) {
+        this.season = season;
+    }
+
+    public void setDvdSeason(int dvdSeason) {
+        this.dvdSeason = dvdSeason;
     }
 
     public void setOverview(String overview) {
@@ -68,6 +96,10 @@ public class Episode {
 
     public void setAirDate(Date airDate) {
         this.airDate = airDate;
+    }
+
+    public void setEpisodeId(int episodeId) {
+        this.episodeId = episodeId;
     }
 
     @Override
@@ -79,6 +111,7 @@ public class Episode {
 
         if (episodeNumber != episode.episodeNumber) return false;
         if (absoluteEpisodeNumber != episode.absoluteEpisodeNumber) return false;
+        if (season != episode.season) return false;
         if (!title.equals(episode.title)) return false;
         return airDate.equals(episode.airDate);
 
@@ -89,6 +122,7 @@ public class Episode {
         int result = title.hashCode();
         result = 31 * result + episodeNumber;
         result = 31 * result + absoluteEpisodeNumber;
+        result = 31 * result + season;
         result = 31 * result + airDate.hashCode();
         return result;
     }
@@ -99,10 +133,21 @@ public class Episode {
         sb.append("title='").append(title).append('\'');
         sb.append(", episodeNumber=").append(episodeNumber);
         sb.append(", absoluteEpisodeNumber=").append(absoluteEpisodeNumber);
-        sb.append(", resolution='").append(resolution).append('\'');
+        sb.append(", season=").append(season);
         sb.append(", overview='").append(overview).append('\'');
         sb.append(", airDate=").append(airDate);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (this.absoluteEpisodeNumber > ((Episode)o).getAbsoluteEpisodeNumber()){
+            return 1;
+        } else if (this.absoluteEpisodeNumber < ((Episode)o).getAbsoluteEpisodeNumber()){
+            return -1;
+        }
+
+        return 0;
     }
 }
