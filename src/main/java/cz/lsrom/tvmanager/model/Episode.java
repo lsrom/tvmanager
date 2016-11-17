@@ -110,20 +110,14 @@ public class Episode implements Comparable {
         Episode episode = (Episode) o;
 
         if (episodeNumber != episode.episodeNumber) return false;
-        if (absoluteEpisodeNumber != episode.absoluteEpisodeNumber) return false;
-        if (season != episode.season) return false;
-        if (!title.equals(episode.title)) return false;
-        return airDate.equals(episode.airDate);
+        return season == episode.season;
 
     }
 
     @Override
     public int hashCode() {
-        int result = title.hashCode();
-        result = 31 * result + episodeNumber;
-        result = 31 * result + absoluteEpisodeNumber;
+        int result = episodeNumber;
         result = 31 * result + season;
-        result = 31 * result + airDate.hashCode();
         return result;
     }
 
