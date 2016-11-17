@@ -73,6 +73,7 @@ public class TheTVDBProvider {
      * @return New TheTVDBProvider object or null in case of failure.
      */
     public static TheTVDBProvider login (){
+        logger.debug("Logging in TheTVDB API with key: " + THETVDB_API_KEY);
         Gson gson = new Gson();
         String tokenJson = null;
         try {
@@ -159,15 +160,11 @@ public class TheTVDBProvider {
 
             JsonArray data = Json.parse(episodes).asObject().get("data").asArray(); // get data with episodes
 
-            try {
-                for (JsonValue value : data){       // parse every episode
-                    Episode e = parseJsonToEpisode(value);
-                    // if episode doesn't have absolute number, than it's not show episode
-                    if (e.getAbsoluteEpisodeNumber() == -1){ continue; }
-                    list.add(e);
-                }
-            } catch (ParseException e) {
-                logger.error(e.getMessage());
+            for (JsonValue value : data){       // parse every episode
+                Episode e = parseJsonToEpisode(value);
+                // if episode doesn't have absolute number, than it's not show episode
+                if (e.getAbsoluteEpisodeNumber() == -1){ continue; }
+                list.add(e);
             }
         } while (!next.equals("null"));     // repeat until there is no more pages
 
@@ -301,9 +298,8 @@ public class TheTVDBProvider {
      *
      * @param value JSON string which will be converted to Episode.
      * @return New Episode object with fields set to value retrieved from TheTVDB or default.
-     * @throws ParseException When strings from JSON representing numbers cannot be parsed.
      */
-    private static Episode parseJsonToEpisode (@NotNull JsonValue value) throws ParseException {
+    private static Episode parseJsonToEpisode (@NotNull JsonValue value) {
         String title = null;
         int episodeNumber = -1;
         int dvdEpisodeNumber = -1;
@@ -315,7 +311,7 @@ public class TheTVDBProvider {
         int episodeId = -1;
 
         String tmp;     // variable for holding integer values before parsing
-        title = value.asObject().getString(JSON_EPISODE_TITLE, "").trim();
+        title = value.asObject().get(JSON_EPISODE_TITLE).toString().trim();
 
         tmp = value.asObject().get(JSON_EPISODE_NUMBER).toString();
         episodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
@@ -332,8 +328,14 @@ public class TheTVDBProvider {
         tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).toString();
         dvdSeason = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        overview = value.asObject().getString(JSON_EPISODE_OVERVIEW, "").trim();
-        airDate = dateFormat.parse(value.asObject().getString(JSON_EPISODE_AIRDATE, ""));
+        overview = value.asObject().get(JSON_EPISODE_OVERVIEW).toString().trim();
+
+        tmp = value.asObject().get(JSON_EPISODE_AIRDATE).toString().replaceAll("\\\"", "");
+        try {
+            airDate = tmp != null && !tmp.isEmpty() ? dateFormat.parse(tmp) : null;
+        } catch (ParseException e) {
+            logger.error(e.getMessage());
+        }
         episodeId = value.asObject().getInt(JSON_EPISODE_ID, -1);
 
         return new Episode(

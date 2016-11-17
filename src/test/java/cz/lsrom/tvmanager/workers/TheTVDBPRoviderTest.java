@@ -47,7 +47,7 @@ public class TheTVDBPRoviderTest {
             tvdbProvider = TheTVDBProvider.login();
         }
 
-        Show show = tvdbProvider.searchForShow("This is show that should exist...");
+        Show show = tvdbProvider.searchForShow("This is show that shouldn't exist...");
 
         assertNull(show);
     }
