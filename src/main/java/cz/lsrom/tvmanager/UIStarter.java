@@ -19,7 +19,7 @@ import java.io.IOException;
 public class UIStarter extends Application {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
-    private static Preferences preferences;
+    public static Preferences preferences;
 
     public static void main(String[] args) {
         if (PreferencesHandler.preferencesExist()){

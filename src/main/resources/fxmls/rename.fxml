@@ -14,7 +14,7 @@
                         <Button fx:id="btnClearAll" mnemonicParsing="false" text="Clear" />
                         <Button fx:id="btnRename" mnemonicParsing="false" text="Rename" />
                         <Pane HBox.hgrow="ALWAYS" />
-                        <TextField fx:id="replacementString" />
+                        <TextField fx:id="txtReplacementString" />
                         <Button fx:id="btnOkReplacementString" mnemonicParsing="false" text="OK" />
                     </items>
                 </ToolBar>

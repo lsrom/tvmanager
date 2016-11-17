@@ -1,6 +1,8 @@
 package cz.lsrom.tvmanager.controller;
 
+import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.model.EpisodeFile;
+import cz.lsrom.tvmanager.model.PreferencesHandler;
 import cz.lsrom.tvmanager.workers.Parser;
 import cz.lsrom.tvmanager.workers.Renamer;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,13 +11,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -27,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,13 +41,14 @@ public class RenameController {
     @FXML private Button btnAddDirectories;
     @FXML private Button btnClearAll;
     @FXML private Button btnRename;
+    @FXML private Button btnOkReplacementString;
+    @FXML private TextField txtReplacementString;
 
     private List<File> filesToRename;
     private List<EpisodeFile> episodeFileList;
     private Renamer renamer;
 
     Thread theTvdbLogin = new Thread();
-
 
     @FXML
     private void initialize() {
@@ -60,6 +60,8 @@ public class RenameController {
 
         initializeBtnAddFiles();
         initializeBtnAddDirectories();
+        initializeBtnOkReplacementString();
+        txtReplacementString.setText(UIStarter.preferences.getReplacementString());
 
         //initializeKeyboardShortcuts();
 
@@ -175,6 +177,19 @@ public class RenameController {
 
             if (loadFilesFromDirectory(dir)){
                 populateViewWithItems();
+            }
+        });
+    }
+
+    private void initializeBtnOkReplacementString (){
+        btnOkReplacementString.setOnAction(event -> {
+            String replacementString = txtReplacementString.getText();
+
+            UIStarter.preferences.setReplacementString(replacementString);
+            try {
+                PreferencesHandler.savePreferences(UIStarter.preferences);
+            } catch (IOException e) {
+                logger.error(e.toString());
             }
         });
     }
