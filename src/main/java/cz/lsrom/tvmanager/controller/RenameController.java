@@ -2,6 +2,7 @@ package cz.lsrom.tvmanager.controller;
 
 import cz.lsrom.tvmanager.model.EpisodeFile;
 import cz.lsrom.tvmanager.workers.Parser;
+import cz.lsrom.tvmanager.workers.Renamer;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -22,6 +23,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,6 +35,8 @@ import java.util.List;
  * Created by lsrom on 11/9/16.
  */
 public class RenameController {
+    private static Logger logger = LoggerFactory.getLogger(RenameController.class);
+
     @FXML private TableView showList;
     @FXML private Button btnAddFiles;
     @FXML private Button btnAddDirectories;
@@ -40,10 +45,15 @@ public class RenameController {
 
     private List<File> filesToRename;
     private List<EpisodeFile> episodeFileList;
+    private Renamer renamer;
+
+    Thread theTvdbLogin = new Thread();
 
 
     @FXML
     private void initialize() {
+        logger.debug("RenamerControlller initializing.");
+
         initializeTable();
         setColumnWidth();
         setColumnValueFactory();
@@ -52,6 +62,18 @@ public class RenameController {
         initializeBtnAddDirectories();
 
         //initializeKeyboardShortcuts();
+
+        Task<Renamer> createRenamerObject = new Task<Renamer>() {
+            @Override
+            protected Renamer call() throws Exception {
+                return new Renamer();
+            }
+        };
+
+        createRenamerObject.setOnSucceeded(event -> renamer = createRenamerObject.getValue());
+
+        theTvdbLogin.setDaemon(true);
+        theTvdbLogin.start();
     }
 
     private void populateViewWithItems (){
@@ -66,12 +88,17 @@ public class RenameController {
         Task<List<EpisodeFile>> getEpisodeFiles = new Task<List<EpisodeFile>>() {
             @Override
             protected List<EpisodeFile> call() throws Exception {
+                logger.debug("Parsing files.");
                 List<EpisodeFile> list = new ArrayList<>();
 
                 for (File f : filesToRename){
-                    list.add(Parser.parse(f));
+                    EpisodeFile ep = Parser.parse(f);
+                    list.add(ep);
+                    // todo renamer in new thread
+                    renamer.addShow(ep);
                 }
 
+                logger.debug("Parsing done.");
                 return list;
             }
         };
@@ -80,18 +107,22 @@ public class RenameController {
         getEpisodeFiles.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
             @Override
             public void handle(WorkerStateEvent event) {
-                for (EpisodeFile ef : getEpisodeFiles.getValue()){                          // iterate over all episodes
+                logger.debug("Files parsed successfully - writing to screen.");
+                episodeFileList = getEpisodeFiles.getValue();
+                for (EpisodeFile ef : episodeFileList){                          // iterate over all episodes
                     ObservableList<String> row = FXCollections.observableArrayList();       // create new row so we don't overwrite the existing one
                     row.setAll(ef.getShowName(),
                             ef.getDirectory(),
                             ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
-                            "TODO",                                                         // todo add new name
-                            "Downloading");                                                     // todo ?
+                            "Working...",                                                         // todo add new name
+                            "Added");                                                     // todo ?
 
                     data.add(row);
                 }
 
                 showList.getItems().addAll(data);       // set all items to the table
+
+                startRenaming();
             }
         });
 
@@ -100,30 +131,50 @@ public class RenameController {
         episodeGetter.start();
     }
 
-    private void initializeBtnAddFiles (){
-        btnAddFiles.setOnAction(new EventHandler<ActionEvent>() {
+    private void startRenaming (){
+        System.out.println ("here");
+        Task<List<String>> getNewNamesForFiles = new Task<List<String>>() {
             @Override
-            public void handle(ActionEvent event) {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Choose Files to Rename");
-                filesToRename = fileChooser.showOpenMultipleDialog(showList.getScene().getWindow());
+            protected List<String> call() throws Exception {
+                for (EpisodeFile ep : episodeFileList){
+                    ObservableList<String> row = FXCollections.observableArrayList();
+                    row.set(3, "tadaaaaa");
+                    showList.getItems().set(1, row);
+                    System.out.println("dadadada");
+                }
 
-                populateViewWithItems();
+                return null;
             }
+        };
+
+        System.out.println ("there");
+
+        Thread episodeGetter = new Thread(getNewNamesForFiles);     // create new thread with the task
+        episodeGetter.setDaemon(true);
+        episodeGetter.start();
+
+        System.out.println("and there");
+
+    }
+
+    private void initializeBtnAddFiles (){
+        btnAddFiles.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Choose Files to Rename");
+            filesToRename = fileChooser.showOpenMultipleDialog(showList.getScene().getWindow());
+
+            populateViewWithItems();
         });
     }
 
     private void initializeBtnAddDirectories (){
-        btnAddDirectories.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                DirectoryChooser directoryChooser = new DirectoryChooser();
-                directoryChooser.setTitle("Choose Directories");
-                File dir = directoryChooser.showDialog(showList.getScene().getWindow());
+        btnAddDirectories.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Choose Directories");
+            File dir = directoryChooser.showDialog(showList.getScene().getWindow());
 
-                if (loadFilesFromDirectory(dir)){
-                    populateViewWithItems();
-                }
+            if (loadFilesFromDirectory(dir)){
+                populateViewWithItems();
             }
         });
     }
@@ -134,6 +185,7 @@ public class RenameController {
 
     private void initializeTable (){
         showList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);  // enable multi row selection
+        showList.setEditable(true);
     }
 
     private void setColumnWidth (){
@@ -193,14 +245,11 @@ public class RenameController {
         final KeyCombination openDir = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
 
 
-        showList.getScene().addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                System.out.println ("event");
-                if (openFiles.match(event)){
-                    System.out.println ("match");
-                    btnAddFiles.fire();
-                }
+        showList.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+            System.out.println ("event");
+            if (openFiles.match(event)){
+                System.out.println ("match");
+                btnAddFiles.fire();
             }
         });
     }
