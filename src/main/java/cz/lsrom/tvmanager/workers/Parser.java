@@ -1,5 +1,6 @@
 package cz.lsrom.tvmanager.workers;
 
+import com.sun.istack.internal.NotNull;
 import cz.lsrom.tvmanager.model.EpisodeFile;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public abstract class Parser {
                             lastMatchCount = 3;     // set to 3 as this is the current level of match (group count)
 
                             // if we have group count 3 we want to end the loop because we have the best result
-                            return new EpisodeFile(showTitle, season, episode, resolution, directory, episodeFile);
+                            return new EpisodeFile(capitalizeString(showTitle), season, episode, resolution, directory, episodeFile);
                         }
                         break;
                     default:
@@ -83,7 +84,7 @@ public abstract class Parser {
         }
 
         // return EpisodeFile with the values we've got
-        return new EpisodeFile(showTitle, season, episode, resolution, directory, episodeFile);
+        return new EpisodeFile(capitalizeString(showTitle), season, episode, resolution, directory, episodeFile);
     }
 
     /**
@@ -170,16 +171,39 @@ public abstract class Parser {
     /**
      * Checks if given character is present in the string more than once.
      * Note that it doesn't count the number of occurrences, only checks if there is more then one.
+     * If null is passed, returns FALSE.
      *
      * @param str String to be searched for occurrences of given character.
      * @param c Character to be count in the string.
      * @return Boolean TRUE if character is in the string multiple times, otherwise FALSE.
      */
-    private static boolean hasMultipleOccurrences (String str, char c){
+    private static boolean hasMultipleOccurrences (@NotNull String str, char c){
+        if (str == null){return false;}
         if (str.indexOf(c) != str.lastIndexOf(c)){
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Takes string as input and returns the same string but with every starting letter of a word capitalized.
+     * Words are separated by spaces. If parameter 'str' is null, returns empty string.
+     *
+     * @param str String to be capitalized.
+     * @return Capitalized string.
+     */
+    private static String capitalizeString (@NotNull String str){
+        if (str == null){return "";}
+        String[] array = str.split(" ");
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String s : array){
+            stringBuilder.append(s.substring(0, 1).toUpperCase());
+            stringBuilder.append(s.substring(1, s.length()));
+            stringBuilder.append(" ");
+        }
+
+        return stringBuilder.toString().trim();
     }
 }
