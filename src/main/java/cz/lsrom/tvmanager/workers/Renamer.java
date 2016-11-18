@@ -3,6 +3,7 @@ package cz.lsrom.tvmanager.workers;
 import com.sun.istack.internal.NotNull;
 import cz.lsrom.tvmanager.model.Episode;
 import cz.lsrom.tvmanager.model.EpisodeFile;
+import cz.lsrom.tvmanager.model.ReplacementToken;
 import cz.lsrom.tvmanager.model.Show;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,15 +46,25 @@ public class Renamer {
     }
 
     public String getNewFileName (EpisodeFile episodeFile, String replacementString){
-        if (episodeFile.getEpisodeNum() == -1){
-            findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), -1, episodeFile.getEpisodeNum());
+        Episode episode;
+
+        if (episodeFile.getSeason() == -1){
+            episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), -1, episodeFile.getEpisodeNum());
         } else {
-            findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), episodeFile.getEpisodeNum(), null);
+            episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), episodeFile.getEpisodeNum(), null);
         }
 
-        // todo make the replacement for new filename
+        if (episode == null){return null;}
 
-        return "New super cool name";
+        // todo make the replacement for new filename
+        String tmp = replacementString;
+
+        tmp = tmp.replace(ReplacementToken.SHOW_NAME.getToken(), episodeFile.getShowName());
+        logger.debug(episodeFile.getShowName());
+        tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());
+        logger.debug(episode.getTitle());
+
+        return tmp;
     }
 
     private Episode findEpisode (String showName, int season, int episode, Integer absoluteEpisode){
