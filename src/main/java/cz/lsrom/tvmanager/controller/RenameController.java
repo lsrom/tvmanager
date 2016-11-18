@@ -5,13 +5,12 @@ import cz.lsrom.tvmanager.model.EpisodeFile;
 import cz.lsrom.tvmanager.model.PreferencesHandler;
 import cz.lsrom.tvmanager.workers.Parser;
 import cz.lsrom.tvmanager.workers.Renamer;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -21,6 +20,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lsrom on 11/9/16.
@@ -48,11 +51,13 @@ public class RenameController {
     private List<EpisodeFile> episodeFileList;
     private Renamer renamer;
 
-    Thread theTvdbLogin = new Thread();
+    private ExecutorService service;
+    private ObservableList<Pair<EpisodeFile, ObservableList<String>>> data;
 
     @FXML
     private void initialize() {
         logger.debug("RenamerControlller initializing.");
+        service = Executors.newFixedThreadPool(10);
 
         initializeTable();
         setColumnWidth();
@@ -61,7 +66,10 @@ public class RenameController {
         initializeBtnAddFiles();
         initializeBtnAddDirectories();
         initializeBtnOkReplacementString();
-        txtReplacementString.setText(UIStarter.preferences.getReplacementString());
+        initializeBtnRename();
+        initializeBtnClearAll();
+
+        txtReplacementString.setText(UIStarter.preferences.replacementString);
 
         //initializeKeyboardShortcuts();
 
@@ -74,6 +82,7 @@ public class RenameController {
 
         createRenamerObject.setOnSucceeded(event -> renamer = createRenamerObject.getValue());
 
+        Thread theTvdbLogin = new Thread(createRenamerObject);
         theTvdbLogin.setDaemon(true);
         theTvdbLogin.start();
     }
@@ -84,7 +93,7 @@ public class RenameController {
         }
 
         // here we'll put all episode files -> this will be the data for the table
-        ObservableList<ObservableList> data = FXCollections.observableArrayList();
+        data = FXCollections.observableArrayList();
 
         // this task will run asynchronously so UI thread won't be frozen by parsing filenames
         Task<List<EpisodeFile>> getEpisodeFiles = new Task<List<EpisodeFile>>() {
@@ -96,8 +105,7 @@ public class RenameController {
                 for (File f : filesToRename){
                     EpisodeFile ep = Parser.parse(f);
                     list.add(ep);
-                    // todo renamer in new thread
-                    renamer.addShow(ep);
+                    service.submit(() -> renamer.addShow(ep));
                 }
 
                 logger.debug("Parsing done.");
@@ -106,26 +114,23 @@ public class RenameController {
         };
 
         // set listener for when the task ends
-        getEpisodeFiles.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                logger.debug("Files parsed successfully - writing to screen.");
-                episodeFileList = getEpisodeFiles.getValue();
-                for (EpisodeFile ef : episodeFileList){                          // iterate over all episodes
-                    ObservableList<String> row = FXCollections.observableArrayList();       // create new row so we don't overwrite the existing one
-                    row.setAll(ef.getShowName(),
-                            ef.getDirectory(),
-                            ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
-                            "Working...",                                                         // todo add new name
-                            "Added");                                                     // todo ?
+        getEpisodeFiles.setOnSucceeded(event -> {
+            logger.debug("Files parsed successfully - writing to screen.");
+            episodeFileList = getEpisodeFiles.getValue();
+            for (EpisodeFile ef : episodeFileList){                          // iterate over all episodes
+                ObservableList<String> row = FXCollections.observableArrayList();       // create new row so we don't overwrite the existing one
+                row.setAll(ef.getShowName(),
+                        ef.getDirectory(),
+                        ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
+                        "Working...",                                                         // todo add new name
+                        "Added");                                                     // todo ?
 
-                    data.add(row);
-                }
-
-                showList.getItems().addAll(data);       // set all items to the table
-
-                startRenaming();
+                data.add(new Pair<>(ef, row));
             }
+
+            showList.getItems().addAll(data);       // set all items to the table
+
+            service.submit(() -> startRenaming());
         });
 
         Thread episodeGetter = new Thread(getEpisodeFiles);     // create new thread with the task
@@ -134,35 +139,27 @@ public class RenameController {
     }
 
     private void startRenaming (){
-        System.out.println ("here");
-        Task<List<String>> getNewNamesForFiles = new Task<List<String>>() {
-            @Override
-            protected List<String> call() throws Exception {
-                for (EpisodeFile ep : episodeFileList){
-                    ObservableList<String> row = FXCollections.observableArrayList();
-                    row.set(3, "tadaaaaa");
-                    showList.getItems().set(1, row);
-                    System.out.println("dadadada");
-                }
+        try {
+            service.awaitTermination(5, TimeUnit.SECONDS);      // todo add this to preferences
+        } catch (InterruptedException e) {
+            logger.error(e.toString());
+        }
 
-                return null;
-            }
-        };
+        logger.debug("renaming now...");
 
-        System.out.println ("there");
+        for (Pair<EpisodeFile, ObservableList<String>> p : data){
+            String newFilename = renamer.getNewFileName(p.getKey(), UIStarter.preferences.replacementString);
+            Platform.runLater(() -> p.getValue().set(3, newFilename));
+        }
 
-        Thread episodeGetter = new Thread(getNewNamesForFiles);     // create new thread with the task
-        episodeGetter.setDaemon(true);
-        episodeGetter.start();
-
-        System.out.println("and there");
-
+        showList.refresh();
     }
 
     private void initializeBtnAddFiles (){
         btnAddFiles.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose Files to Rename");
+            fileChooser.setInitialDirectory(new File(UIStarter.preferences.defaultFileChooserOpenLocation));
             filesToRename = fileChooser.showOpenMultipleDialog(showList.getScene().getWindow());
 
             populateViewWithItems();
@@ -173,6 +170,7 @@ public class RenameController {
         btnAddDirectories.setOnAction(event -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             directoryChooser.setTitle("Choose Directories");
+            directoryChooser.setInitialDirectory(new File(UIStarter.preferences.defaultFileChooserOpenLocation));
             File dir = directoryChooser.showDialog(showList.getScene().getWindow());
 
             if (loadFilesFromDirectory(dir)){
@@ -185,7 +183,7 @@ public class RenameController {
         btnOkReplacementString.setOnAction(event -> {
             String replacementString = txtReplacementString.getText();
 
-            UIStarter.preferences.setReplacementString(replacementString);
+            UIStarter.preferences.replacementString = replacementString;
             try {
                 PreferencesHandler.savePreferences(UIStarter.preferences);
             } catch (IOException e) {
@@ -194,13 +192,27 @@ public class RenameController {
         });
     }
 
-    private void initializeBtnClearAll (){}
+    private void initializeBtnClearAll (){
+        btnClearAll.setOnAction(event -> {
+            showList.getItems().clear();
+        });
+    }
 
-    private void initializeBtnRename (){}
+    private void initializeBtnRename (){
+        // todo
+    }
 
     private void initializeTable (){
         showList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);  // enable multi row selection
         showList.setEditable(true);
+
+        showList.setOnKeyPressed(event -> {
+            final Object selectedItem = showList.getSelectionModel().getSelectedItem();
+
+            if (selectedItem != null && event.getCode().equals(KeyCode.DELETE)){
+                data.remove(selectedItem);
+            }
+        });
     }
 
     private void setColumnWidth (){
@@ -217,38 +229,38 @@ public class RenameController {
     private void setColumnValueFactory (){
         ObservableList<TableColumn> columns = showList.getColumns();
 
-        columns.get(0).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>,String>, ObservableValue<String>>() {
+        columns.get(0).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
             @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
-                return new SimpleStringProperty(param.getValue().get(0));
+            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
+                return new SimpleStringProperty(param.getValue().getValue().get(0));
             }
         });
 
-        columns.get(1).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>,String>, ObservableValue<String>>() {
+        columns.get(1).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
             @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
-                return new SimpleStringProperty(param.getValue().get(1));
+            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
+                return new SimpleStringProperty(param.getValue().getValue().get(1));
             }
         });
 
-        columns.get(2).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>,String>, ObservableValue<String>>() {
+        columns.get(2).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
             @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
-                return new SimpleStringProperty(param.getValue().get(2));
+            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
+                return new SimpleStringProperty(param.getValue().getValue().get(2));
             }
         });
 
-        columns.get(3).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>,String>, ObservableValue<String>>() {
+        columns.get(3).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
             @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
-                return new SimpleStringProperty(param.getValue().get(3));
+            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
+                return new SimpleStringProperty(param.getValue().getValue().get(3));
             }
         });
 
-        columns.get(4).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>,String>, ObservableValue<String>>() {
+        columns.get(4).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
             @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<ObservableList<String>, String> param) {
-                return new SimpleStringProperty(param.getValue().get(4));
+            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
+                return new SimpleStringProperty(param.getValue().getValue().get(4));
             }
         });
     }
