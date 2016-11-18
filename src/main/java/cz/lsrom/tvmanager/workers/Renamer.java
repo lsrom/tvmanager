@@ -101,7 +101,10 @@ public class Renamer {
 
         tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());
 
-        return tmp;
+        String ext = episodeFile.getFile().getName();
+        ext = ext.substring(ext.lastIndexOf("."));
+
+        return tmp + ext;
     }
 
     public EpisodeFile rename (EpisodeFile episodeFile) throws IOException {
@@ -111,10 +114,6 @@ public class Renamer {
         episodeFile.setFile(p.toFile());
 
         return episodeFile;
-    }
-
-    public void rename (String originalPath, String dir, String newName) throws IOException {
-        Files.move(Paths.get(originalPath), Paths.get(dir + System.getProperty("file.separator") +  newName));
     }
 
     private Episode findEpisode (String showName, int season, int episode, Integer absoluteEpisode){
