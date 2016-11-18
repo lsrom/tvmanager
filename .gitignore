@@ -4,7 +4,6 @@
 log/
 target/
 out/
-src/test/resources/log4j.properties
 
 TestMain.java
 
