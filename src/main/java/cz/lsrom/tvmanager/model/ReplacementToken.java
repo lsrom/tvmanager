@@ -6,7 +6,7 @@ package cz.lsrom.tvmanager.model;
 public enum ReplacementToken {
     SHOW_NAME("%S", "Name of the show."),
     SEASON_NUM("%2s", "Season number."),
-    EPISODE_NUM("%2e", "Episode number"),
+    EPISODE_NUM("%2e", "Episode number."),
     EPISODE_ABS_NUM("%3E", "Absolute episode number."),
     EPISODE_TITLE("%t", "Episode title."),
     EPISODE_RESOLUTION("%r", "Episode resolution.");
