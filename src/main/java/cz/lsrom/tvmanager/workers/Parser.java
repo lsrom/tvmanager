@@ -171,14 +171,14 @@ public abstract class Parser {
     /**
      * Checks if given character is present in the string more than once.
      * Note that it doesn't count the number of occurrences, only checks if there is more then one.
-     * If null is passed, returns FALSE.
+     * If null is passed or parameter string is empty, returns FALSE.
      *
      * @param str String to be searched for occurrences of given character.
      * @param c Character to be count in the string.
      * @return Boolean TRUE if character is in the string multiple times, otherwise FALSE.
      */
     private static boolean hasMultipleOccurrences (@NotNull String str, char c){
-        if (str == null){return false;}
+        if (str == null || str.isEmpty()){return false;}
         if (str.indexOf(c) != str.lastIndexOf(c)){
             return true;
         }
@@ -188,13 +188,13 @@ public abstract class Parser {
 
     /**
      * Takes string as input and returns the same string but with every starting letter of a word capitalized.
-     * Words are separated by spaces. If parameter 'str' is null, returns empty string.
+     * Words are separated by spaces. If parameter 'str' is null or empty, returns empty string.
      *
      * @param str String to be capitalized.
      * @return Capitalized string.
      */
     private static String capitalizeString (@NotNull String str){
-        if (str == null){return "";}
+        if (str == null || str.isEmpty()){return "";}
         String[] array = str.split(" ");
         StringBuilder stringBuilder = new StringBuilder();
 
