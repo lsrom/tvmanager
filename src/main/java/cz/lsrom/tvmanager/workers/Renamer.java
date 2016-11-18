@@ -8,6 +8,11 @@ import cz.lsrom.tvmanager.model.Show;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -24,6 +29,8 @@ public class Renamer {
 
     private static Pattern seasonNumber = Pattern.compile(".*(%\\d*s).*");
     private static Pattern episodeNumber = Pattern.compile(".*(%\\d*e).*");
+    private static Pattern episodeNumberAbs = Pattern.compile(".*(%\\d*E).*");
+    private static Pattern episodeResolution = Pattern.compile(".*(%r).*");
 
     TheTVDBProvider tvdbProvider;
 
@@ -80,9 +87,34 @@ public class Renamer {
             tmp = tmp.replaceAll(episodeNumber.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);
         }
 
+        matcher = episodeNumberAbs.matcher(tmp);
+        if (matcher.matches() && matcher.groupCount() == 1){
+            String s = matcher.group(1).replaceAll("\\D", "");
+            String newEpisodeNum = String.format("%0" + s + "d", episode.getAbsoluteEpisodeNumber());
+            tmp = tmp.replaceAll(episodeNumberAbs.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);
+        }
+
+        matcher = episodeResolution.matcher(tmp);
+        if (matcher.matches() && matcher.groupCount() == 1){
+            tmp = tmp.replaceAll(episodeResolution.pattern().replaceAll("\\.\\*", ""), episodeFile.getResolution());
+        }
+
         tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());
 
         return tmp;
+    }
+
+    public EpisodeFile rename (EpisodeFile episodeFile) throws IOException {
+        Path p = Paths.get(episodeFile.getDirectory() + System.getProperty("file.separator") + episodeFile.getNewFilename());
+        Files.move(episodeFile.getFile().toPath(), p);
+
+        episodeFile.setFile(p.toFile());
+
+        return episodeFile;
+    }
+
+    public void rename (String originalPath, String dir, String newName) throws IOException {
+        Files.move(Paths.get(originalPath), Paths.get(dir + System.getProperty("file.separator") +  newName));
     }
 
     private Episode findEpisode (String showName, int season, int episode, Integer absoluteEpisode){

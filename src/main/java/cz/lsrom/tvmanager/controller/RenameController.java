@@ -157,6 +157,7 @@ public class RenameController {
             String newFilename = renamer.getNewFileName(p.getKey(), UIStarter.preferences.replacementString);
 
             if (newFilename != null){
+                p.getKey().setNewFilename(newFilename);
                 Platform.runLater(() -> p.getValue().set(3, newFilename));
             }
         }
@@ -210,7 +211,20 @@ public class RenameController {
     }
 
     private void initializeBtnRename (){
-        // todo
+        btnRename.setOnAction(event -> {
+            ObservableList<Pair<EpisodeFile, ObservableList<String>>> selected = showList.getSelectionModel().getSelectedItems();
+
+            for (Pair<EpisodeFile, ObservableList<String>> p : selected.size() == 0 ? data : selected){
+                try {
+                    p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
+                    p.getValue().set(2, p.getValue().get(3));
+                } catch (IOException e) {
+                    logger.error(e.toString());
+                }
+            }
+
+            showList.refresh();
+        });
     }
 
     private void initializeTable (){
@@ -218,10 +232,12 @@ public class RenameController {
         showList.setEditable(true);
 
         showList.setOnKeyPressed(event -> {
-            final Object selectedItem = showList.getSelectionModel().getSelectedItem();
+            final ObservableList selectedItems = showList.getSelectionModel().getSelectedItems();
 
-            if (selectedItem != null && event.getCode().equals(KeyCode.DELETE)){
-                data.remove(selectedItem);
+            if (selectedItems != null && event.getCode().equals(KeyCode.DELETE)){
+                data.removeAll(selectedItems);
+
+                showList.setItems(data);
             }
         });
     }
