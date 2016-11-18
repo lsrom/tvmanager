@@ -122,8 +122,7 @@ public class RenameController {
                 row.setAll(ef.getShowName(),
                         ef.getDirectory(),
                         ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
-                        "Working...",                                                         // todo add new name
-                        "Added");                                                     // todo ?
+                        "Working...");
 
                 data.add(new Pair<>(ef, row));
             }
@@ -149,7 +148,10 @@ public class RenameController {
 
         for (Pair<EpisodeFile, ObservableList<String>> p : data){
             String newFilename = renamer.getNewFileName(p.getKey(), UIStarter.preferences.replacementString);
-            Platform.runLater(() -> p.getValue().set(3, newFilename));
+
+            if (newFilename != null){
+                Platform.runLater(() -> p.getValue().set(3, newFilename));
+            }
         }
 
         showList.refresh();
@@ -219,11 +221,10 @@ public class RenameController {
         ObservableList<TableColumn> columns = showList.getColumns();
 
         // set width of columns - works even when window is resized
-        columns.get(0).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(12));
-        columns.get(1).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
-        columns.get(2).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
-        columns.get(3).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(15));
-        columns.get(4).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(7));
+        columns.get(0).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(10));
+        columns.get(1).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(10));
+        columns.get(2).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(22));
+        columns.get(3).prefWidthProperty().bind(showList.widthProperty().divide(64).multiply(22));
     }
 
     private void setColumnValueFactory (){
@@ -254,13 +255,6 @@ public class RenameController {
             @Override
             public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
                 return new SimpleStringProperty(param.getValue().getValue().get(3));
-            }
-        });
-
-        columns.get(4).setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>,String>, ObservableValue<String>>() {
-            @Override
-            public ObservableValue call(TableColumn.CellDataFeatures<Pair<EpisodeFile, ObservableList<String>>, String> param) {
-                return new SimpleStringProperty(param.getValue().getValue().get(4));
             }
         });
     }

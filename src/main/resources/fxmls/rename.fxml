@@ -23,10 +23,9 @@
                 <TableView fx:id="showList" prefHeight="176.0" prefWidth="583.0" tableMenuButtonVisible="false" BorderPane.alignment="CENTER">
                     <columns>
                         <TableColumn prefWidth="300.0" text="Show" />
-                        <TableColumn prefWidth="300.0" text="Directory" />
-                        <TableColumn prefWidth="300.0" text="Original Name" />
-                        <TableColumn prefWidth="300.0" text="New Name" />
-                        <TableColumn prefWidth="80.0" text="Status" />
+                        <TableColumn prefWidth="200.0" text="Directory" />
+                        <TableColumn prefWidth="350.0" text="Original Name" />
+                        <TableColumn prefWidth="350.0" text="New Name" />
                     </columns>
                 </TableView>
             </center>
