@@ -139,7 +139,7 @@ public abstract class Parser {
 
         output = output.replaceAll("_", " ");           // remove all '_' from output
         output = output.replaceAll("[ ]{2,}", " ");     // replace any subsequent spaces with single space
-        output = output.replaceAll("[\\.]{2,}", ".");   // replace any subsequent dots with single dot
+        output = output.replaceAll("[\\.]{1,}", " ");   // replace any dots with single space
         output = output.replaceAll("$[-]", "");         // remove leading underscores
 
         return output.trim();
