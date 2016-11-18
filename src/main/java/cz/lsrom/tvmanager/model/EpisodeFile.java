@@ -12,6 +12,7 @@ public class EpisodeFile {
     private String resolution;
     private String directory;
     private File file;
+    private String newFilename;
 
     public EpisodeFile(String showName, Integer season, int episodeNum, String resolution, String directory, File file) {
         this.showName = showName;
@@ -46,6 +47,10 @@ public class EpisodeFile {
         return file;
     }
 
+    public String getNewFilename() {
+        return newFilename;
+    }
+
     public void setShowName(String showName) {
         this.showName = showName;
     }
@@ -68,6 +73,10 @@ public class EpisodeFile {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public void setNewFilename(String newFilename) {
+        this.newFilename = newFilename;
     }
 
     @Override
