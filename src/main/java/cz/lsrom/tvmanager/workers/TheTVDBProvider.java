@@ -311,26 +311,26 @@ public class TheTVDBProvider {
         int episodeId = -1;
 
         String tmp;     // variable for holding integer values before parsing
-        title = value.asObject().get(JSON_EPISODE_TITLE).toString().trim();
+        title = value.asObject().get(JSON_EPISODE_TITLE).asString().trim();
 
-        tmp = value.asObject().get(JSON_EPISODE_NUMBER).toString();
+        tmp = value.asObject().get(JSON_EPISODE_NUMBER).asString();
         episodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).toString();
+        tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).asString();
         dvdEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).toString();
+        tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).asString();
         absoluteEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_SEASON).toString();
+        tmp = value.asObject().get(JSON_EPISODE_SEASON).asString();
         season = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).toString();
+        tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).asString();
         dvdSeason = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        overview = value.asObject().get(JSON_EPISODE_OVERVIEW).toString().trim();
+        overview = value.asObject().get(JSON_EPISODE_OVERVIEW).asString().trim();
 
-        tmp = value.asObject().get(JSON_EPISODE_AIRDATE).toString().replaceAll("\\\"", "");
+        tmp = value.asObject().get(JSON_EPISODE_AIRDATE).asString().replaceAll("\\\"", "");
         try {
             airDate = tmp != null && !tmp.isEmpty() ? dateFormat.parse(tmp) : null;
         } catch (ParseException e) {
