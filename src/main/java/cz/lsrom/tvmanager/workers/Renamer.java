@@ -8,7 +8,6 @@ import cz.lsrom.tvmanager.model.Show;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,90 +33,122 @@ public class Renamer {
 
     TheTVDBProvider tvdbProvider;
 
+    /**
+     * Create new Renamer object. This will login to TheTVDB.
+     */
     public Renamer() {
         tvdbProvider = TheTVDBProvider.login();
         shows = new ConcurrentHashMap<>();
         alreadyDownloaded = new ConcurrentHashMap<>();
     }
 
+    /**
+     * If show metadata are not yet downloaded from TheTVDB this method will download them and store them.
+     * It is safe (and in fact encouraged) to run this method in multiple threads as shows are stored in ConcurrentHashMap.
+     *
+     * @param episodeFile Episode of show we want to download.
+     */
     public void addShow (@NotNull EpisodeFile episodeFile){
         if (alreadyDownloaded.containsKey(episodeFile.getShowName().toLowerCase())){
-            logger.debug("Adding already downloaded show {}.", episodeFile.getShowName());
-            // todo
-        } else {
-            logger.debug("Adding new show {}.", episodeFile.getShowName());
-
-            Show s = tvdbProvider.searchForShow(episodeFile.getShowName());
-            s.setEpisodes(tvdbProvider.getAllEpisodesForShow(s.getId()));
-
-            shows.put(s.getTitle().toLowerCase(), s);
-            alreadyDownloaded.put(episodeFile.getShowName().toLowerCase(), s.getId());
-
-            logger.debug("New show {} added.", episodeFile.getShowName());
+            return;     // if we already have the show, don't add it again
         }
+
+        logger.debug("Adding new show {}.", episodeFile.getShowName());
+
+        Show s = tvdbProvider.searchForShow(episodeFile.getShowName());     // search for the show with it's name parsed from the file
+        s.setEpisodes(tvdbProvider.getAllEpisodesForShow(s.getId()));       // now get all episodes for the show
+
+        shows.put(s.getTitle().toLowerCase(), s);       // save show with episodes
+        alreadyDownloaded.put(episodeFile.getShowName().toLowerCase(), s.getId());  // save show name to already downloaded so we have easy way of checking if we have the show or not
     }
 
+    /**
+     * Creates new filename based on downloaded metadata and replacement string structure. Returns either string with
+     * new filename or null if no metadata for this episode was found.
+     *
+     * @param episodeFile Episode for which new filename should be found.
+     * @param replacementString String with structure of the new filename.
+     * @return String with new filename or null.
+     */
     public String getNewFileName (EpisodeFile episodeFile, String replacementString){
         Episode episode;
         Matcher matcher;
 
-        if (episodeFile.getSeason() == -1){
+        if (episodeFile.getSeason() == -1){     // if season is -1 then search for episode based on it's absolute number
             episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), -1, episodeFile.getEpisodeNum());
-        } else {
+        } else {        // search for episode based on it's season and episode number
             episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), episodeFile.getEpisodeNum(), null);
         }
 
-        if (episode == null){return null;}
+        if (episode == null){return null;}      // we didn't find any episode, return null
 
-        String tmp = replacementString;
+        String tmp = replacementString;     // this string will be transformed to new filename
 
-        tmp = tmp.replace(ReplacementToken.SHOW_NAME.getToken(), episodeFile.getShowName());
+        tmp = tmp.replace(ReplacementToken.SHOW_NAME.getToken(), episodeFile.getShowName());    // set show name
 
-        matcher = seasonNumber.matcher(tmp);
+        matcher = seasonNumber.matcher(tmp);    // check if there is token for season number
         if (matcher.matches() && matcher.groupCount() == 1){
-            String s = matcher.group(1).replaceAll("\\D", "");
-            String newSeasonNum = String.format("%0" + s + "d", episode.getSeason());
-            tmp = tmp.replaceAll(seasonNumber.pattern().replaceAll("\\.\\*", ""), newSeasonNum);
+            String s = matcher.group(1).replaceAll("\\D", "");  // get only number from the token - it says how many zeroes to prefix
+            String newSeasonNum = String.format("%0" + s + "d", episode.getSeason());   // format season number
+            tmp = tmp.replaceAll(seasonNumber.pattern().replaceAll("\\.\\*", ""), newSeasonNum);    // set season number
         }
 
-        matcher = episodeNumber.matcher(tmp);
+        matcher = episodeNumber.matcher(tmp);   // check if there is token for episode number
         if (matcher.matches() && matcher.groupCount() == 1){
-            String s = matcher.group(1).replaceAll("\\D", "");
-            String newEpisodeNum = String.format("%0" + s + "d", episode.getEpisodeNumber());
-            tmp = tmp.replaceAll(episodeNumber.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);
+            String s = matcher.group(1).replaceAll("\\D", "");  // get only number from the token - it says how many zeroes to prefix
+            String newEpisodeNum = String.format("%0" + s + "d", episode.getEpisodeNumber());   // format episode number
+            tmp = tmp.replaceAll(episodeNumber.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);  // set episode number
         }
 
-        matcher = episodeNumberAbs.matcher(tmp);
+        matcher = episodeNumberAbs.matcher(tmp);    // check if there is token for absolute episode number
         if (matcher.matches() && matcher.groupCount() == 1){
-            String s = matcher.group(1).replaceAll("\\D", "");
-            String newEpisodeNum = String.format("%0" + s + "d", episode.getAbsoluteEpisodeNumber());
-            tmp = tmp.replaceAll(episodeNumberAbs.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);
+            String s = matcher.group(1).replaceAll("\\D", "");  // get only number from the token - it says how many zeroes to prefix
+            String newEpisodeNum = String.format("%0" + s + "d", episode.getAbsoluteEpisodeNumber());   // format absolute episode number
+            tmp = tmp.replaceAll(episodeNumberAbs.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);   // set absolute episode number
         }
 
-        matcher = episodeResolution.matcher(tmp);
+        matcher = episodeResolution.matcher(tmp);   // check if there is token for episode resolution
         if (matcher.matches() && matcher.groupCount() == 1){
             tmp = tmp.replaceAll(episodeResolution.pattern().replaceAll("\\.\\*", ""), episodeFile.getResolution());
         }
 
-        tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());
+        tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());   // set episode title
 
-        String ext = episodeFile.getFile().getName();
-        ext = ext.substring(ext.lastIndexOf("."));
+        String ext = episodeFile.getFile().getName();   // get old filename
+        ext = ext.substring(ext.lastIndexOf("."));      // and extract it's file extension from it
 
-        return tmp + ext;
+        return tmp + ext;   // this is new filename with file extension
     }
 
+    /**
+     * Makes the action of renaming the file. Takes the old file location from EpisodeFile and moves the file to the new location.
+     * New location is old directory followed by new filename.
+     *
+     * @param episodeFile EpisodeFile with old file path to current file and new filename.
+     * @return EpisodeFile with updated file path - old file is replaced with new one with new filename.
+     * @throws IOException When file can't be accessed or new location cannot be write into.
+     */
     public EpisodeFile rename (EpisodeFile episodeFile) throws IOException {
         Path p = Paths.get(episodeFile.getDirectory() + System.getProperty("file.separator") + episodeFile.getNewFilename());
         Files.move(episodeFile.getFile().toPath(), p);
 
-        episodeFile.setFile(p.toFile());
+        episodeFile.setFile(p.toFile());    // set filepath for the new file
 
-        return episodeFile;
+        return episodeFile;     // return episode with new filepath
     }
 
+    /**
+     * Find episode in episode list. can search either based on absolute episode number or combination of season number
+     * and episode number.
+     *
+     * @param showName name of the show this episode belongs to.
+     * @param season What season is this episode in? If absoluteEpisode parameter is set, this can be whatever.
+     * @param episode What episode in given season is this? If absoluteEpisode parameter is set, this can be whatever.
+     * @param absoluteEpisode If this is set, search uses absolute number of episode to find it.
+     * @return New Episode object.
+     */
     private Episode findEpisode (String showName, int season, int episode, Integer absoluteEpisode){
-        List<Episode> episodes = shows.get(showName.toLowerCase()).getEpisodes();
+        List<Episode> episodes = shows.get(showName.toLowerCase()).getEpisodes();   // get episodes for show based on shows name
 
         if (absoluteEpisode == null){   // search using season and episode number
             int pos = 0;

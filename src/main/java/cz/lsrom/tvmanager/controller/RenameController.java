@@ -284,18 +284,17 @@ public class RenameController {
         });
     }
 
-
-
     private void initializeKeyboardShortcuts (){
         final KeyCombination openFiles = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN);
         final KeyCombination openDir = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
 
-
-        showList.getScene().addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-            System.out.println ("event");
-            if (openFiles.match(event)){
-                System.out.println ("match");
-                btnAddFiles.fire();
+        showList.getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (openFiles.match(event)) {
+                logger.debug("Event matches action: Open Files.");
+                event.consume();
+            } else if (openDir.match(event)) {
+                logger.debug("Event matches action: Open Dir.");
+                event.consume();
             }
         });
     }
