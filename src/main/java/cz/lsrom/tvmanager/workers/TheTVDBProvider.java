@@ -163,8 +163,9 @@ public class TheTVDBProvider {
             for (JsonValue value : data){       // parse every episode
                 Episode e = parseJsonToEpisode(value);
                 // if episode doesn't have absolute number, than it's not show episode
-                if (e.getAbsoluteEpisodeNumber() == -1){ continue; }
+                if (e == null || e.getAbsoluteEpisodeNumber() == -1){ continue; }
                 list.add(e);
+                logger.debug(list.size() + "");
             }
         } while (!next.equals("null"));     // repeat until there is no more pages
 
@@ -310,25 +311,31 @@ public class TheTVDBProvider {
         Date airDate = null;
         int episodeId = -1;
 
-        String tmp;     // variable for holding integer values before parsing
-        title = value.asObject().get(JSON_EPISODE_TITLE).asString().trim();
+        String tmp;     // variable for holding temporary field values
+        JsonValue obj;
 
-        tmp = value.asObject().get(JSON_EPISODE_NUMBER).asString();
+        obj = value.asObject().get(JSON_EPISODE_TITLE);
+        if (obj.isNull()){return null;}
+        title = obj.asString().trim();
+
+        tmp = value.asObject().get(JSON_EPISODE_NUMBER).toString();
         episodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).asString();
+        tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).toString();
         dvdEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).asString();
-        absoluteEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+        tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).toString();
+        absoluteEpisodeNumber = tmp.equals("null") || tmp.equals("0") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_SEASON).asString();
+        tmp = value.asObject().get(JSON_EPISODE_SEASON).toString();
         season = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).asString();
+        tmp = value.asObject().get(JSON_EPISODE_DVD_SEASON).toString();
         dvdSeason = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
-        overview = value.asObject().get(JSON_EPISODE_OVERVIEW).asString().trim();
+        obj = value.asObject().get(JSON_EPISODE_OVERVIEW);
+        if (obj.isNull()){return null;}
+        overview = obj.asString().trim();
 
         tmp = value.asObject().get(JSON_EPISODE_AIRDATE).asString().replaceAll("\\\"", "");
         try {
