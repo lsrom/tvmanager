@@ -1,6 +1,7 @@
 package cz.lsrom.tvmanager.model;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ public abstract class PreferencesHandler {
     }
 
     public static void savePreferences (Preferences preferences) throws IOException {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(preferences);
 
         // if directory doesn't exist, create it
