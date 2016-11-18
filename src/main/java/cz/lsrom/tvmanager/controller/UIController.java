@@ -2,8 +2,6 @@ package cz.lsrom.tvmanager.controller;
 
 import cz.lsrom.tvmanager.UIStarter;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -34,7 +32,7 @@ public class UIController {
         Parent tab = null;
 
         try {
-            tab = FXMLLoader.load(this.getClass().getResource("/fxmls/rename.fxml"));
+            tab = FXMLLoader.load(this.getClass().getResource("/fxmls/automatic_rename.fxml"));
         } catch (IOException e) {
             e.printStackTrace();
         }
