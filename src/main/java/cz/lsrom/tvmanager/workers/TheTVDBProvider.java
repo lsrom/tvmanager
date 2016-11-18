@@ -165,7 +165,6 @@ public class TheTVDBProvider {
                 // if episode doesn't have absolute number, than it's not show episode
                 if (e == null || e.getAbsoluteEpisodeNumber() == -1){ continue; }
                 list.add(e);
-                logger.debug(list.size() + "");
             }
         } while (!next.equals("null"));     // repeat until there is no more pages
 

@@ -22,8 +22,8 @@ public class Renamer {
     private static ConcurrentHashMap<String, String> alreadyDownloaded;
     private static ConcurrentHashMap<String, Show> shows;
 
-    private static Pattern seasonNumber = Pattern.compile("%\\d*s");
-    private static Pattern episodeNumber = Pattern.compile("%\\d*e");
+    private static Pattern seasonNumber = Pattern.compile(".*(%\\d*s).*");
+    private static Pattern episodeNumber = Pattern.compile(".*(%\\d*e).*");
 
     TheTVDBProvider tvdbProvider;
 
@@ -41,7 +41,6 @@ public class Renamer {
             logger.debug("Adding new show {}.", episodeFile.getShowName());
 
             Show s = tvdbProvider.searchForShow(episodeFile.getShowName());
-            //s.setEpisodes(tvdbProvider.getAllEpisodesForShow(alreadyDownloaded.get(episodeFile.getShowName().toLowerCase())));
             s.setEpisodes(tvdbProvider.getAllEpisodesForShow(s.getId()));
 
             shows.put(s.getTitle().toLowerCase(), s);
@@ -69,18 +68,16 @@ public class Renamer {
 
         matcher = seasonNumber.matcher(tmp);
         if (matcher.matches() && matcher.groupCount() == 1){
-            String s = matcher.group(1);
-            s.replaceAll("\\D", "");
+            String s = matcher.group(1).replaceAll("\\D", "");
             String newSeasonNum = String.format("%0" + s + "d", episode.getSeason());
-            tmp = tmp.replace(seasonNumber.pattern(), newSeasonNum);
+            tmp = tmp.replaceAll(seasonNumber.pattern().replaceAll("\\.\\*", ""), newSeasonNum);
         }
 
         matcher = episodeNumber.matcher(tmp);
         if (matcher.matches() && matcher.groupCount() == 1){
-            String s = matcher.group(1);
-            s.replaceAll("\\D", "");
+            String s = matcher.group(1).replaceAll("\\D", "");
             String newEpisodeNum = String.format("%0" + s + "d", episode.getEpisodeNumber());
-            tmp = tmp.replace(episodeNumber.pattern(), newEpisodeNum);
+            tmp = tmp.replaceAll(episodeNumber.pattern().replaceAll("\\.\\*", ""), newEpisodeNum);
         }
 
         tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());
