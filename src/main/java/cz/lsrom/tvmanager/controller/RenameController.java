@@ -51,13 +51,15 @@ public class RenameController {
     private List<EpisodeFile> episodeFileList;
     private Renamer renamer;
 
-    private ExecutorService service;
+    private ExecutorService addingService;
+    private ExecutorService renamingService;
     private ObservableList<Pair<EpisodeFile, ObservableList<String>>> data;
 
     @FXML
     private void initialize() {
         logger.debug("RenamerControlller initializing.");
-        service = Executors.newFixedThreadPool(10);
+
+        renamingService = Executors.newFixedThreadPool(5);
 
         initializeTable();
         setColumnWidth();
@@ -92,6 +94,8 @@ public class RenameController {
             return;
         }
 
+        addingService = Executors.newFixedThreadPool(10);
+
         // here we'll put all episode files -> this will be the data for the table
         data = FXCollections.observableArrayList();
 
@@ -105,8 +109,10 @@ public class RenameController {
                 for (File f : filesToRename){
                     EpisodeFile ep = Parser.parse(f);
                     list.add(ep);
-                    service.submit(() -> renamer.addShow(ep));
+                    addingService.submit(() -> renamer.addShow(ep));
                 }
+
+                addingService.shutdown();
 
                 logger.debug("Parsing done.");
                 return list;
@@ -129,7 +135,7 @@ public class RenameController {
 
             showList.getItems().addAll(data);       // set all items to the table
 
-            service.submit(() -> startRenaming());
+            renamingService.submit(() -> startRenaming());
         });
 
         Thread episodeGetter = new Thread(getEpisodeFiles);     // create new thread with the task
@@ -138,13 +144,14 @@ public class RenameController {
     }
 
     private void startRenaming (){
+        boolean interrupted = false;
         try {
-            service.awaitTermination(5, TimeUnit.SECONDS);      // todo add this to preferences
+            interrupted = addingService.awaitTermination(10, TimeUnit.SECONDS);      // todo add this to preferences
         } catch (InterruptedException e) {
             logger.error(e.toString());
         }
 
-        logger.debug("renaming now...");
+        logger.debug("Renaming interruption: {}.", interrupted ? "service finished." : "timeout.");
 
         for (Pair<EpisodeFile, ObservableList<String>> p : data){
             String newFilename = renamer.getNewFileName(p.getKey(), UIStarter.preferences.replacementString);
@@ -191,6 +198,8 @@ public class RenameController {
             } catch (IOException e) {
                 logger.error(e.toString());
             }
+
+            renamingService.submit(() -> startRenaming());
         });
     }
 
