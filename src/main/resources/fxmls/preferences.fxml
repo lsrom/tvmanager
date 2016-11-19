@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cz.lsrom.tvmanager.controller.PreferencesController">
+   <children>
+      <BorderPane prefHeight="600.0" prefWidth="400.0">
+         <center>
+            <TabPane prefHeight="342.0" prefWidth="683.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+              <tabs>
+                <Tab text="General">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+                <Tab text="Automatic Renaming">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="200.0">
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="400">
+                                 <children>
+                                    <TextArea fx:id="renameText" prefHeight="100.0" text="Use these tokens in rename format to get the filename you want. Numbers after the '%' sign are for padding numbers with zeroes. For example, %3s will make season number always three digits long with leading zeroes." wrapText="true" VBox.vgrow="SOMETIMES">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                       </padding>
+                                    </TextArea>
+                                    <ListView fx:id="renameTokensList" minHeight="160.0" prefHeight="400.0" prefWidth="380.0">
+                                       <VBox.margin>
+                                          <Insets bottom="20.0" left="10.0" right="10.0" top="10.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                       </padding></ListView>
+                                    <HBox prefHeight="50.0" prefWidth="400.0">
+                                       <children>
+                                          <Label text="Rename Format">
+                                             <HBox.margin>
+                                                <Insets left="10.0" />
+                                             </HBox.margin>
+                                          </Label>
+                                          <TextField fx:id="txtRenameFormat">
+                                             <HBox.margin>
+                                                <Insets left="10.0" right="20.0" />
+                                             </HBox.margin></TextField>
+                                          <Button fx:id="btnRenameFormat" mnemonicParsing="false" text="OK" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children></AnchorPane>
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+         </center>
+         <top>
+            <HBox prefHeight="30.0" prefWidth="400.0" BorderPane.alignment="CENTER" />
+         </top>
+      </BorderPane>
+   </children>
+</AnchorPane>

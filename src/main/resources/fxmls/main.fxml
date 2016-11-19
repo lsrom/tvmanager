@@ -9,7 +9,8 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem fx:id="btnClose" mnemonicParsing="false" text="Close" />
+                <MenuItem fx:id="btnPreferences" mnemonicParsing="false" text="Preferences" />
+                <MenuItem fx:id="btnClose" mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
