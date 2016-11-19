@@ -1,6 +1,5 @@
 package cz.lsrom.tvmanager.controller;
 
-import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.model.PreferencesHandler;
 import cz.lsrom.tvmanager.model.ReplacementToken;
 import javafx.fxml.FXML;
@@ -20,6 +19,10 @@ import static cz.lsrom.tvmanager.UIStarter.preferences;
 public class PreferencesController {
     private static Logger logger = LoggerFactory.getLogger(PreferencesController.class);
 
+    @FXML private TextField txtDefaultOpenLocation;
+    @FXML private Button btnChooseDefaultOpenLocation;
+    @FXML private TextField txtTvDirectory;
+    @FXML private Button btnChoseTvDirectory;
     @FXML private TextArea renameText;
     @FXML private ListView<String> renameTokensList;
     @FXML private TextField txtRenameFormat;
@@ -31,6 +34,11 @@ public class PreferencesController {
 
     @FXML
     public void initialize (){
+        initializeTxtDefaultOpenLocation();
+        initializeBtnChooseDefaultOpenLocation();
+        initializeTxtTvDirectory();
+        initializeBtnChooseTvDirectory();
+
         initializeRenameLabel();
         initializeTokensList();
         initializeTxtRenameFormat();
@@ -40,6 +48,45 @@ public class PreferencesController {
         initializeCheckAggressivelySkipEmptyResolutionToken();
         initializeCheckSaveRenameHistory();
         initializeChoiceRenameHistory();
+    }
+
+    private void initializeTxtDefaultOpenLocation (){
+        txtDefaultOpenLocation.setText(preferences.defaultFileChooserOpenLocation);
+
+        txtDefaultOpenLocation.setTooltip(new Tooltip("This is where all pick file/directory dialogs will start " +
+                "so it might be wise to pick your download directory."));
+    }
+
+    private void initializeBtnChooseDefaultOpenLocation (){
+        btnChooseDefaultOpenLocation.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Choose default location for file chooser.");
+            File dir = directoryChooser.showDialog(btnChooseDefaultOpenLocation.getScene().getWindow());
+
+            txtDefaultOpenLocation.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+
+            preferences.defaultFileChooserOpenLocation = dir == null ? "" : dir.getAbsolutePath().toString();
+            savePreferences();
+        });
+    }
+
+    private void initializeTxtTvDirectory (){
+        txtTvDirectory.setText(preferences.tvShowDirectory);
+
+        txtTvDirectory.setTooltip(new Tooltip("This should be the root directory of your TV show collection."));
+    }
+
+    private void initializeBtnChooseTvDirectory (){
+        btnChoseTvDirectory.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Choose default location for file chooser.");
+            File dir = directoryChooser.showDialog(btnChoseTvDirectory.getScene().getWindow());
+
+            btnChoseTvDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+
+            preferences.tvShowDirectory = dir == null ? "" : dir.getAbsolutePath().toString();
+            savePreferences();
+        });
     }
 
     private void initializeRenameLabel (){
