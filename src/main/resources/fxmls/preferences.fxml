@@ -41,7 +41,7 @@
                                        <children>
                                           <Label text="Rename Format">
                                              <HBox.margin>
-                                                <Insets left="10.0" />
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                              </HBox.margin>
                                           </Label>
                                           <TextField fx:id="txtRenameFormat">
@@ -49,6 +49,30 @@
                                                 <Insets left="10.0" right="20.0" />
                                              </HBox.margin></TextField>
                                           <Button fx:id="btnRenameFormat" mnemonicParsing="false" text="OK" />
+                                       </children>
+                                    </HBox>
+                                    <CheckBox fx:id="checkSkipEmptyResolutionToken" mnemonicParsing="false" text="Skip empty resolution token?">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </CheckBox>
+                                    <CheckBox fx:id="checkAggressivelySkipEmptyResolutionToken" mnemonicParsing="false" text="Aggressively skip empty resolution token?">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </VBox.margin>
+                                    </CheckBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <CheckBox fx:id="checkSaveRenameHistory" mnemonicParsing="false" text="Save rename history?">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin>
+                                          </CheckBox>
+                                          <ChoiceBox fx:id="choiceRenameHistory" disable="true" prefWidth="150.0">
+                                             <HBox.margin>
+                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                             </HBox.margin>
+                                          </ChoiceBox>
                                        </children>
                                     </HBox>
                                  </children>
