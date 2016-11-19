@@ -30,12 +30,16 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Created by lsrom on 11/9/16.
@@ -211,6 +215,8 @@ public class RenameController {
             directoryChooser.setInitialDirectory(new File(UIStarter.preferences.defaultFileChooserOpenLocation));
             File dir = directoryChooser.showDialog(showList.getScene().getWindow());
 
+
+
             if (loadFilesFromDirectory(dir)){
                 populateViewWithItems();
             }
@@ -335,10 +341,45 @@ public class RenameController {
         }
 
         if (dir.isDirectory()){
-            filesToRename = Arrays.asList(dir.listFiles());
+            filesToRename = listFilesInDir(dir.toString());
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * List all files in given directory. If directory is null or empty,
+     * new empty ArrayList is returned.
+     *
+     * Note that this method looks even through subdirectories but returns only files.
+     *
+     * @param dir String path to directory from which the function should start listing files.
+     * @return List of Strings containing all files or empty list if no such files exist.
+     */
+    private List<File> listFilesInDir (String dir){
+        if (dir == null){ return new ArrayList<>(); }   // end in case of empty/null dir parameter and return empty list
+
+        List<Path> list = new ArrayList<>();            // stores all found files and directories
+
+        try (Stream<Path> stream = Files.list(Paths.get(dir))){
+            stream.forEach(list::add);  // add each found file to list
+        } catch (IOException e) {
+            logger.error(e.toString());
+        }
+
+        List<File> files = new ArrayList<>();
+
+        for (Path p : list){
+            File file = new File(p.toUri());
+            if (file.isDirectory()){
+                // if file is directory, list all files from it recursively
+                files.addAll(listFilesInDir(file.toString()));
+            } else {
+                files.add(file);       // add normal file to list
+            }
+        }
+
+        return files;
     }
 }
