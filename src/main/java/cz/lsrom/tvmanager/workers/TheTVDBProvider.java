@@ -239,7 +239,7 @@ public class TheTVDBProvider {
             try (OutputStream os = http.getOutputStream()){
                 os.write(outputBytes);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.toString());
             }
         }
 
