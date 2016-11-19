@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -62,6 +63,9 @@ public class RenameController {
     private void initialize() {
         logger.debug("RenamerControlller initializing.");
 
+        // here we'll put all episode files -> this will be the data for the table
+        data = FXCollections.observableArrayList();
+
         renamingService = Executors.newFixedThreadPool(5);
 
         initializeTable();
@@ -99,9 +103,6 @@ public class RenameController {
 
         addingService = Executors.newFixedThreadPool(10);
 
-        // here we'll put all episode files -> this will be the data for the table
-        data = FXCollections.observableArrayList();
-
         // this task will run asynchronously so UI thread won't be frozen by parsing filenames
         Task<List<EpisodeFile>> getEpisodeFiles = new Task<List<EpisodeFile>>() {
             @Override
@@ -126,24 +127,46 @@ public class RenameController {
         getEpisodeFiles.setOnSucceeded(event -> {
             logger.debug("Files parsed successfully - writing to screen.");
             episodeFileList = getEpisodeFiles.getValue();
+            boolean added = false;
             for (EpisodeFile ef : episodeFileList){                          // iterate over all episodes
+                File f = ef.getFile();
+
                 ObservableList<String> row = FXCollections.observableArrayList();       // create new row so we don't overwrite the existing one
                 row.setAll(ef.getShowName(),
                         ef.getDirectory(),
-                        ef.getFile().toString().replace(ef.getDirectory() + "/", ""),   // get original name
+                        ef.getFile().toString().replace(ef.getDirectory() + "/", ""), // get original name
                         "Working...");
 
-                data.add(new Pair<>(ef, row));
+                if (isNewFile(f)){
+                    added = data.add(new Pair<>(ef, row));
+                }
             }
 
+            showList.getItems().clear();
             showList.getItems().addAll(data);       // set all items to the table
 
-            renamingService.submit(() -> startRenaming());
+            if (added){
+                renamingService.submit(() -> startRenaming());
+            }
+            showList.refresh();
         });
 
         Thread episodeGetter = new Thread(getEpisodeFiles);     // create new thread with the task
         episodeGetter.setDaemon(true);
         episodeGetter.start();
+    }
+
+    private boolean isNewFile (File file){
+        if (showList.getItems().isEmpty()){return true;}
+
+        for (Object o : showList.getItems()){
+            if (((Pair<EpisodeFile, ObservableList<String>>)o).getKey().getFile().equals(file)){
+                logger.debug("Attempting to add already added file. Skipping.");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void startRenaming (){
@@ -162,6 +185,8 @@ public class RenameController {
             if (newFilename != null){
                 p.getKey().setNewFilename(newFilename);
                 Platform.runLater(() -> p.getValue().set(3, newFilename));
+            } else {
+                Platform.runLater(() -> p.getValue().set(3, "Failed"));
             }
         }
 
@@ -189,6 +214,7 @@ public class RenameController {
             if (loadFilesFromDirectory(dir)){
                 populateViewWithItems();
             }
+            long x = System.nanoTime();
         });
     }
 
@@ -210,6 +236,7 @@ public class RenameController {
     private void initializeBtnClearAll (){
         btnClearAll.setOnAction(event -> {
             showList.getItems().clear();
+            data.clear();
         });
     }
 
@@ -240,7 +267,7 @@ public class RenameController {
             if (selectedItems != null && event.getCode().equals(KeyCode.DELETE)){
                 data.removeAll(selectedItems);
 
-                showList.setItems(data);
+                showList.getItems().setAll(data);
             }
         });
     }

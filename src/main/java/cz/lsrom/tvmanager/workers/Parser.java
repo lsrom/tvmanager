@@ -15,6 +15,8 @@ public abstract class Parser {
     private static final String[] REGEX = {
             "(.+)[\\D\\Wa\\\\b](\\d\\d\\d)[\\D\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
             "(.+?\\W\\D*?)[sS](\\d\\d?)[eE](\\d\\d?).*",    // matches normal shows (3 groups = show, season, episode)
+            "(.+?)\\d{4}.*[sS](\\d\\d?)[eE](\\d\\d?).*",      // matches normal shows with year (3 groups = show, season, episode)
+            "(.+\\W\\D*?)[sS](\\d\\d?)\\D*?[eE](\\d\\d?).*",    // matches normal show (3 groups = show, season, episode)
     };
 
     // regular expression to match resolution part of filename
@@ -36,6 +38,7 @@ public abstract class Parser {
 
         String directory = episodeFile.getParent() == null ? "" : episodeFile.getParent();
         String showTitle = "";
+        String showId = "";
         int season = -1;
         int episode = -1;
         String resolution = "";
@@ -74,7 +77,7 @@ public abstract class Parser {
                             lastMatchCount = 3;     // set to 3 as this is the current level of match (group count)
 
                             // if we have group count 3 we want to end the loop because we have the best result
-                            return new EpisodeFile(capitalizeString(showTitle), season, episode, resolution, directory, episodeFile);
+                            return new EpisodeFile(capitalizeString(showTitle), showId, season, episode, resolution, directory, episodeFile);
                         }
                         break;
                     default:
@@ -84,7 +87,7 @@ public abstract class Parser {
         }
 
         // return EpisodeFile with the values we've got
-        return new EpisodeFile(capitalizeString(showTitle), season, episode, resolution, directory, episodeFile);
+        return new EpisodeFile(capitalizeString(showTitle), showId, season, episode, resolution, directory, episodeFile);
     }
 
     /**

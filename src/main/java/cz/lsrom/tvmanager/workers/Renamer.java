@@ -50,6 +50,7 @@ public class Renamer {
      */
     public void addShow (@NotNull EpisodeFile episodeFile){
         if (alreadyDownloaded.containsKey(episodeFile.getShowName().toLowerCase())){
+            episodeFile.setShowId(alreadyDownloaded.get(episodeFile.getShowName().toLowerCase()));
             return;     // if we already have the show, don't add it again
         }
 
@@ -57,8 +58,9 @@ public class Renamer {
 
         Show s = tvdbProvider.searchForShow(episodeFile.getShowName());     // search for the show with it's name parsed from the file
         s.setEpisodes(tvdbProvider.getAllEpisodesForShow(s.getId()));       // now get all episodes for the show
+        episodeFile.setShowId(s.getId());
 
-        shows.put(s.getTitle().toLowerCase(), s);       // save show with episodes
+        shows.put(s.getId().toLowerCase(), s);       // save show with episodes
         alreadyDownloaded.put(episodeFile.getShowName().toLowerCase(), s.getId());  // save show name to already downloaded so we have easy way of checking if we have the show or not
     }
 
@@ -75,9 +77,9 @@ public class Renamer {
         Matcher matcher;
 
         if (episodeFile.getSeason() == -1){     // if season is -1 then search for episode based on it's absolute number
-            episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), -1, episodeFile.getEpisodeNum());
+            episode = findEpisode(episodeFile.getShowId(), episodeFile.getSeason(), -1, episodeFile.getEpisodeNum());
         } else {        // search for episode based on it's season and episode number
-            episode = findEpisode(episodeFile.getShowName(), episodeFile.getSeason(), episodeFile.getEpisodeNum(), null);
+            episode = findEpisode(episodeFile.getShowId(), episodeFile.getSeason(), episodeFile.getEpisodeNum(), null);
         }
 
         if (episode == null){return null;}      // we didn't find any episode, return null
@@ -141,16 +143,16 @@ public class Renamer {
      * Find episode in episode list. can search either based on absolute episode number or combination of season number
      * and episode number.
      *
-     * @param showName name of the show this episode belongs to.
+     * @param showId Id of the show this episode belongs to.
      * @param season What season is this episode in? If absoluteEpisode parameter is set, this can be whatever.
      * @param episode What episode in given season is this? If absoluteEpisode parameter is set, this can be whatever.
      * @param absoluteEpisode If this is set, search uses absolute number of episode to find it.
      * @return New Episode object.
      */
-    private Episode findEpisode (String showName, int season, int episode, Integer absoluteEpisode){
-        List<Episode> episodes = shows.get(showName.toLowerCase()).getEpisodes();   // get episodes for show based on shows name
+    private Episode findEpisode (String showId, int season, int episode, Integer absoluteEpisode){
+        List<Episode> episodes = shows.get(showId.toLowerCase()).getEpisodes();   // get episodes for show based on shows name
 
-        if (absoluteEpisode == null){   // search using season and episode number
+        if (absoluteEpisode == null || absoluteEpisode == -1){   // search using season and episode number
             int pos = 0;
             if ((pos = episodes.indexOf(new Episode("", episode, -1,  -1, season, -1, "", null, -1))) != -1){
                 return episodes.get(pos);

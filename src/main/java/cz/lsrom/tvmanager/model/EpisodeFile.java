@@ -7,6 +7,7 @@ import java.io.File;
  */
 public class EpisodeFile {
     private String showName;
+    private String showId;
     private Integer season;
     private int episodeNum;
     private String resolution;
@@ -14,8 +15,9 @@ public class EpisodeFile {
     private File file;
     private String newFilename;
 
-    public EpisodeFile(String showName, Integer season, int episodeNum, String resolution, String directory, File file) {
+    public EpisodeFile(String showName, String showId, Integer season, int episodeNum, String resolution, String directory, File file) {
         this.showName = showName;
+        this.showId = showId;
         this.season = season;
         this.episodeNum = episodeNum;
         this.resolution = resolution;
@@ -25,6 +27,10 @@ public class EpisodeFile {
 
     public String getShowName() {
         return showName;
+    }
+
+    public String getShowId() {
+        return showId;
     }
 
     public Integer getSeason() {
@@ -53,6 +59,10 @@ public class EpisodeFile {
 
     public void setShowName(String showName) {
         this.showName = showName;
+    }
+
+    public void setShowId(String showId) {
+        this.showId = showId;
     }
 
     public void setSeason(Integer season) {

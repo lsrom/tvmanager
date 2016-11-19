@@ -27,8 +27,8 @@ public class ParserTest {
         testInputList.add(new TestInput(new File("Supernatural.S04E01.Lazarus.Rising.720p.BluRay.x264.AC3.5.1-LeRalouf.mkv"), "Supernatural", 4, 1, "Lazarues Rising", "720p", ""));
         testInputList.add(new TestInput(new File("Supernatural.S04E22.Lucifer.Rising.1080p.BluRay.x264.AC3.5.1-LeRalouf.mkv"), "Supernatural", 4, 22, "Lucifer Rising", "1080p", ""));
 
-        testInputList.add(new TestInput(new File("[a-s]_dragon_ball_-_105_-_here_comes_yajirobe__rs2_[7f781c7e].mkv"), "dragon ball", -1, 105, "Here Comes Yajirobe", "", ""));
-        testInputList.add(new TestInput(new File("[a-s]_dragon_ball_-_116v2_-_a_taste_of_destiny__rs2_[4d4b0e7e].mkv"), "dragon ball", -1, 116, "A Taste of Destiny", "", ""));
+        testInputList.add(new TestInput(new File("[a-s]_dragon_ball_-_105_-_here_comes_yajirobe__rs2_[7f781c7e].mkv"), "Dragon Ball", -1, 105, "Here Comes Yajirobe", "", ""));
+        testInputList.add(new TestInput(new File("[a-s]_dragon_ball_-_116v2_-_a_taste_of_destiny__rs2_[4d4b0e7e].mkv"), "Dragon Ball", -1, 116, "A Taste of Destiny", "", ""));
         testInputList.add(new TestInput(new File("[AnimeRG] Dragon Ball Super - 001 [1080p] [x265] [pseudo].mkv"), "Dragon Ball Super", -1, 1, "The Peace Prize. Who'll Get the 100 Million Zeny!", "1080p", ""));
         testInputList.add(new TestInput(new File("[PA]-Dragon-Ball-Z-001-[1080p][Hi8b][3849F7F5][V2]-(1).mkv"), "Dragon Ball Z", -1, 1, "The New Threat", "1080p", ""));
         testInputList.add(new TestInput(new File("One-Punch-Man 001 [1080p].mkv"), "One Punch Man", -1, 1, "The Strongest Man", "1080p", ""));
