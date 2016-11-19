@@ -193,12 +193,12 @@ public class PreferencesController {
 
     private void initializeTokensList (){
         renameTokensList.getItems().addAll(
-                ReplacementToken.SHOW_NAME.getToken() + " : " + ReplacementToken.SHOW_NAME.getTokenDescription(),
-                ReplacementToken.SEASON_NUM.getToken() + " : " + ReplacementToken.SEASON_NUM.getTokenDescription(),
-                ReplacementToken.EPISODE_NUM.getToken() + " : " + ReplacementToken.EPISODE_NUM.getTokenDescription(),
-                ReplacementToken.EPISODE_ABS_NUM.getToken() + " : " + ReplacementToken.EPISODE_ABS_NUM.getTokenDescription(),
-                ReplacementToken.EPISODE_TITLE.getToken() + " : " + ReplacementToken.EPISODE_TITLE.getTokenDescription(),
-                ReplacementToken.EPISODE_RESOLUTION.getToken() + " : " + ReplacementToken.EPISODE_RESOLUTION.getTokenDescription()
+                ReplacementToken.SHOW_NAME.getToken() + " \t: " + ReplacementToken.SHOW_NAME.getTokenDescription(),
+                ReplacementToken.SEASON_NUM.getToken() + " \t: " + ReplacementToken.SEASON_NUM.getTokenDescription(),
+                ReplacementToken.EPISODE_NUM.getToken() + " \t: " + ReplacementToken.EPISODE_NUM.getTokenDescription(),
+                ReplacementToken.EPISODE_ABS_NUM.getToken() + " \t: " + ReplacementToken.EPISODE_ABS_NUM.getTokenDescription(),
+                ReplacementToken.EPISODE_TITLE.getToken() + " \t: " + ReplacementToken.EPISODE_TITLE.getTokenDescription(),
+                ReplacementToken.EPISODE_RESOLUTION.getToken() + " \t: " + ReplacementToken.EPISODE_RESOLUTION.getTokenDescription()
         );
 
         renameTokensList.setTooltip(new Tooltip("Double click item to append it to current rename format string."));
