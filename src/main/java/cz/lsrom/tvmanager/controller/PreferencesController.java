@@ -82,7 +82,7 @@ public class PreferencesController {
             directoryChooser.setTitle("Choose default location for file chooser.");
             File dir = directoryChooser.showDialog(btnChoseTvDirectory.getScene().getWindow());
 
-            btnChoseTvDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+            txtTvDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
 
             preferences.tvShowDirectory = dir == null ? "" : dir.getAbsolutePath().toString();
             savePreferences();
