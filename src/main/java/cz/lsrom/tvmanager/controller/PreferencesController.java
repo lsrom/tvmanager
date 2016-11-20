@@ -1,5 +1,6 @@
 package cz.lsrom.tvmanager.controller;
 
+import com.eclipsesource.json.Json;
 import cz.lsrom.tvmanager.model.PreferencesHandler;
 import cz.lsrom.tvmanager.model.ReplacementToken;
 import javafx.fxml.FXML;
@@ -31,6 +32,11 @@ public class PreferencesController {
     @FXML private CheckBox checkAggressivelySkipEmptyResolutionToken;
     @FXML private CheckBox checkSaveRenameHistory;
     @FXML private ChoiceBox<String> choiceRenameHistory;
+    @FXML private TextField txtDownloadDirectory;
+    @FXML private Button btnDownloadDirectory;
+    @FXML private TextField txtFileExtensions;
+    @FXML private Button btnFileExtensions;
+    @FXML private CheckBox checkDownloadDirectory;
 
     @FXML
     public void initialize (){
@@ -48,6 +54,73 @@ public class PreferencesController {
         initializeCheckAggressivelySkipEmptyResolutionToken();
         initializeCheckSaveRenameHistory();
         initializeChoiceRenameHistory();
+
+        initializeTxtDownloadDirectory();
+        initializeBtnDownloadDirectory();
+        initializeTxtFileExtensions();
+        initializeBtnFileExtensions();
+        initializeCheckDownloadDirectory();
+    }
+
+    private void initializeCheckDownloadDirectory (){
+        checkDownloadDirectory.setSelected(preferences.preloadFromDownloadDirectory);
+
+        checkDownloadDirectory.setTooltip(new Tooltip("If enabled, TV Manager will load files from Download directory on every startup."));
+
+        checkDownloadDirectory.setOnAction(event -> {
+            preferences.preloadFromDownloadDirectory = checkDownloadDirectory.isSelected();
+            savePreferences();
+        });
+    }
+
+    private void initializeTxtDownloadDirectory (){
+        txtDownloadDirectory.setText(preferences.tvShowDownloadDirectory);
+
+        if (preferences.tvShowDownloadDirectory.isEmpty()){
+            checkDownloadDirectory.setDisable(true);
+        }
+
+        txtDownloadDirectory.setTooltip(new Tooltip("Pick the directory in which you download new episodes of your TV shows."));
+    }
+
+    private void initializeBtnDownloadDirectory (){
+        btnDownloadDirectory.setOnAction(event -> {
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            directoryChooser.setTitle("Choose your download location.");
+            File dir = directoryChooser.showDialog(btnChooseDefaultOpenLocation.getScene().getWindow());
+
+            txtDownloadDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+
+            preferences.tvShowDownloadDirectory = dir == null ? "" : dir.getAbsolutePath().toString();
+
+            if (!preferences.tvShowDownloadDirectory.isEmpty()){
+                checkDownloadDirectory.setDisable(false);
+            }
+
+            savePreferences();
+        });
+    }
+
+    private void initializeTxtFileExtensions (){
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String s : preferences.supportedFileExtensions){
+            if (stringBuilder.length() != 0){stringBuilder.append(", ");}
+            stringBuilder.append(s);
+        }
+
+        txtFileExtensions.setText(stringBuilder.toString());
+
+        txtFileExtensions.setTooltip(new Tooltip("Set which files should be loaded to TV Manager by their extensions. Separate extensions with commas."));
+    }
+
+    private void initializeBtnFileExtensions (){
+        btnFileExtensions.setOnAction(event -> {
+            String str = txtFileExtensions.getText().replaceAll("[ ]{1,}", "");
+            preferences.supportedFileExtensions = str.split(",");
+
+            savePreferences();
+        });
     }
 
     private void initializeTxtDefaultOpenLocation (){
@@ -229,7 +302,7 @@ public class PreferencesController {
         try {
             PreferencesHandler.savePreferences(preferences);
         } catch (IOException e) {
-            logger.error(e.toString());
+            logger.error(e.getMessage());
         }
     }
 }

@@ -10,8 +10,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -27,19 +27,19 @@ import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import static cz.lsrom.tvmanager.UIStarter.preferences;
 
 /**
  * Created by lsrom on 11/9/16.
@@ -63,6 +63,8 @@ public class RenameController {
     private ExecutorService renamingService;
     private ObservableList<Pair<EpisodeFile, ObservableList<String>>> data;
 
+    private String listFilesExtension = "";     // file extension for regex (ext1|ext2|ext3|...)
+
     @FXML
     private void initialize() {
         logger.debug("RenamerControlller initializing.");
@@ -84,7 +86,16 @@ public class RenameController {
 
         txtReplacementString.setText(UIStarter.preferences.replacementString);
 
-        //initializeKeyboardShortcuts();
+        initializeKeyboardShortcuts();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : preferences.supportedFileExtensions){
+            stringBuilder.append(s);
+            stringBuilder.append("|");
+        }
+
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        listFilesExtension = stringBuilder.toString();
 
         Task<Renamer> createRenamerObject = new Task<Renamer>() {
             @Override
@@ -178,7 +189,7 @@ public class RenameController {
         try {
             interrupted = addingService.awaitTermination(10, TimeUnit.SECONDS);      // todo add this to preferences
         } catch (InterruptedException e) {
-            logger.error(e.toString());
+            logger.error(e.getMessage());
         }
 
         logger.debug("Renaming interruption: {}.", interrupted ? "service finished." : "timeout.");
@@ -232,7 +243,7 @@ public class RenameController {
             try {
                 PreferencesHandler.savePreferences(UIStarter.preferences);
             } catch (IOException e) {
-                logger.error(e.toString());
+                logger.error(e.getMessage());
             }
 
             renamingService.submit(() -> startRenaming());
@@ -255,7 +266,7 @@ public class RenameController {
                     p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
                     p.getValue().set(2, p.getValue().get(3));
                 } catch (IOException e) {
-                    logger.error(e.toString());
+                    logger.error(e.getMessage());
                 }
             }
 
@@ -324,13 +335,19 @@ public class RenameController {
         final KeyCombination openFiles = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN);
         final KeyCombination openDir = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
 
-        showList.getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (openFiles.match(event)) {
-                logger.debug("Event matches action: Open Files.");
-                event.consume();
-            } else if (openDir.match(event)) {
-                logger.debug("Event matches action: Open Dir.");
-                event.consume();
+        EventHandler<KeyEvent> eventHandler = event -> {
+            if (openDir.match(event)) {
+                logger.debug("Event match.");
+            }
+        };
+
+        showList.sceneProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                oldValue.removeEventFilter(KeyEvent.KEY_PRESSED, eventHandler);
+            }
+
+            if (newValue != null) {
+                newValue.addEventFilter(KeyEvent.KEY_PRESSED, eventHandler);
             }
         });
     }
@@ -365,7 +382,7 @@ public class RenameController {
         try (Stream<Path> stream = Files.list(Paths.get(dir))){
             stream.forEach(list::add);  // add each found file to list
         } catch (IOException e) {
-            logger.error(e.toString());
+            logger.error(e.getMessage());
         }
 
         List<File> files = new ArrayList<>();
@@ -375,7 +392,7 @@ public class RenameController {
             if (file.isDirectory()){
                 // if file is directory, list all files from it recursively
                 files.addAll(listFilesInDir(file.toString()));
-            } else {
+            } else if (p.toString().matches("(" + listFilesExtension + ")$")){
                 files.add(file);       // add normal file to list
             }
         }

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public abstract class Parser {
     // regular expression to try on given filename
     private static final String[] REGEX = {
-            "(.+)[\\D\\Wa\\\\b](\\d\\d\\d)[\\D\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
+            "(.+)[\\D\\Wa\\\\b](\\d\\d\\d?)[\\D\\Wa\\\\b].*",     // matches anime files (2 groups = show, episode)
             "(.+?\\W\\D*?)[sS](\\d\\d?)[eE](\\d\\d?).*",    // matches normal shows (3 groups = show, season, episode)
             "(.+?)\\d{4}.*[sS](\\d\\d?)[eE](\\d\\d?).*",      // matches normal shows with year (3 groups = show, season, episode)
             "(.+\\W\\D*?)[sS](\\d\\d?)\\D*?[eE](\\d\\d?).*",    // matches normal show (3 groups = show, season, episode)

@@ -16,6 +16,15 @@ public class Preferences {
     /* Directory with TV shows. */
     public String tvShowDirectory = "";
 
+    /* Director where new TV episodes are downloaded into. */
+    public String tvShowDownloadDirectory = "";
+
+    /* If TRUE then on every startup files from download directory will be loaded. */
+    public boolean preloadFromDownloadDirectory = false;
+
+    /* Only files with this extension will be loaded. */
+    public String[] supportedFileExtensions = {"avi", "mkv", "mp4"};
+
     /* If this is TRUE than resolution token is omitted from replacementString if should be empty. */
     public boolean skipEmptyResolutionToken = false;
 
