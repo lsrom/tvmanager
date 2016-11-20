@@ -226,12 +226,9 @@ public class RenameController {
             directoryChooser.setInitialDirectory(new File(UIStarter.preferences.defaultFileChooserOpenLocation));
             File dir = directoryChooser.showDialog(showList.getScene().getWindow());
 
-
-
             if (loadFilesFromDirectory(dir)){
                 populateViewWithItems();
             }
-            long x = System.nanoTime();
         });
     }
 
@@ -337,7 +334,9 @@ public class RenameController {
 
         EventHandler<KeyEvent> eventHandler = event -> {
             if (openDir.match(event)) {
-                logger.debug("Event match.");
+                btnAddDirectories.fire();
+            } else if (openFiles.match(event)){
+                btnAddFiles.fire();
             }
         };
 
@@ -392,7 +391,7 @@ public class RenameController {
             if (file.isDirectory()){
                 // if file is directory, list all files from it recursively
                 files.addAll(listFilesInDir(file.toString()));
-            } else if (p.toString().matches("(" + listFilesExtension + ")$")){
+            } else if (p.toString().matches(".*(" + listFilesExtension + ")$")){
                 files.add(file);       // add normal file to list
             }
         }
