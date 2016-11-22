@@ -64,6 +64,7 @@ public class RenameController {
     private ObservableList<Pair<EpisodeFile, ObservableList<String>>> data;
 
     private String listFilesExtension = "";     // file extension for regex (ext1|ext2|ext3|...)
+    private String listSkipFilesContaining = "";    // substrings for regex (sub1|sub2|sub3|...)
 
     @FXML
     private void initialize() {
@@ -88,14 +89,25 @@ public class RenameController {
 
         initializeKeyboardShortcuts();
 
+        // create regex with supported file extensions - these will be loaded
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : preferences.supportedFileExtensions){
             stringBuilder.append(s);
             stringBuilder.append("|");
         }
 
-        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);     // remove last '|'
         listFilesExtension = stringBuilder.toString();
+
+        // create regex with filename substrings to be skipped during loading
+        stringBuilder = new StringBuilder();
+        for (String s : preferences.skipFilesContaining){
+            stringBuilder.append(s.toLowerCase());
+            stringBuilder.append("|");
+        }
+
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);     // remove last '|'
+        listSkipFilesContaining = stringBuilder.toString();
 
         Task<Renamer> createRenamerObject = new Task<Renamer>() {
             @Override
@@ -390,10 +402,12 @@ public class RenameController {
 
         for (Path p : list){
             File file = new File(p.toUri());
+            String path = p.toString();
             if (file.isDirectory()){
                 // if file is directory, list all files from it recursively
                 files.addAll(listFilesInDir(file.toString()));
-            } else if (p.toString().matches(".*(" + listFilesExtension + ")$")){
+            } else if (path.matches(".*(" + listFilesExtension + ")$") && !path.toLowerCase().matches(".*(" + listSkipFilesContaining + ").*")){
+                // todo this check only works for Add dir - make it to work for add files as well
                 files.add(file);       // add normal file to list
             }
         }
