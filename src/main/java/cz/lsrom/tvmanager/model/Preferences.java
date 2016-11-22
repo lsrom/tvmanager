@@ -25,6 +25,9 @@ public class Preferences {
     /* Only files with this extension will be loaded. */
     public String[] supportedFileExtensions = {"avi", "mkv", "mp4"};
 
+    /* Files containing these substrings will not be loaded. Case insensitive - "sample" == "Sample" == "SaMpLe" == TRUE */
+    public String[] skipFilesContaining = {"sample"};
+
     /* If this is TRUE than resolution token is omitted from replacementString if should be empty. */
     public boolean skipEmptyResolutionToken = false;
 

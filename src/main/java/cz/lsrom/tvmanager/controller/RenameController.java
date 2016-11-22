@@ -267,6 +267,8 @@ public class RenameController {
                 }
             }
 
+            renamer.forceFlushHistory();
+
             showList.refresh();
         });
     }

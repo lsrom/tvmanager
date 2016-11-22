@@ -20,6 +20,8 @@ import static cz.lsrom.tvmanager.UIStarter.preferences;
 public class PreferencesController {
     private static Logger logger = LoggerFactory.getLogger(PreferencesController.class);
 
+    public static final String RENAME_HISTORY_FILE = "rename_history.log";
+
     @FXML private TextField txtDefaultOpenLocation;
     @FXML private Button btnChooseDefaultOpenLocation;
     @FXML private TextField txtTvDirectory;
@@ -37,6 +39,8 @@ public class PreferencesController {
     @FXML private TextField txtFileExtensions;
     @FXML private Button btnFileExtensions;
     @FXML private CheckBox checkDownloadDirectory;
+    @FXML private TextField txtSkipFiles;
+    @FXML private Button btnSkipFiles;
 
     @FXML
     public void initialize (){
@@ -60,6 +64,30 @@ public class PreferencesController {
         initializeTxtFileExtensions();
         initializeBtnFileExtensions();
         initializeCheckDownloadDirectory();
+        initializeBtnSkipFiles();
+        initializeTxtSkipFiles();
+    }
+
+    private void initializeTxtSkipFiles (){
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String s : preferences.skipFilesContaining){
+            if (stringBuilder.length() != 0){stringBuilder.append(", ");}
+            stringBuilder.append(s);
+        }
+
+        txtSkipFiles.setText(stringBuilder.toString());
+
+        txtSkipFiles.setTooltip(new Tooltip("Files containing these substrings will not be loaded. These substring are case insensitive so the following are all the same: \"sample\", \"Sample\", \"SaMpLe\"."));
+    }
+
+    private void initializeBtnSkipFiles (){
+        btnSkipFiles.setOnAction(event -> {
+            String str = txtSkipFiles.getText().replaceAll("[ ]{1,}", "");
+            preferences.skipFilesContaining = str.split(",");
+
+            savePreferences();
+        });
     }
 
     private void initializeCheckDownloadDirectory (){
@@ -169,6 +197,7 @@ public class PreferencesController {
     }
 
     private void initializeChoiceRenameHistory (){
+        final String defaultLocation = "Default Location";
         final String showDir = "Show Directory";
         final String customLocation = "Custom Location";
 
@@ -177,13 +206,15 @@ public class PreferencesController {
 
         if (preferences.saveRenameHistory && !preferences.saveRenameHistoryToShowDir){
             choiceRenameHistory.getItems().setAll(
+                    defaultLocation,
                     showDir,
                     preferences.customRenameHistoryLocation
             );
 
             choiceRenameHistory.setValue(preferences.customRenameHistoryLocation);
         } else {
-            choiceRenameHistory.getItems().addAll(
+            choiceRenameHistory.getItems().setAll(
+                    defaultLocation,
                     showDir,
                     customLocation
             );
@@ -192,7 +223,13 @@ public class PreferencesController {
         choiceRenameHistory.setOnAction(event -> {
             String selected = choiceRenameHistory.getValue();
 
-            if (selected != null && selected.equals(showDir)){
+            if (selected != null && selected.equals(defaultLocation)){
+                preferences.saveRenameHistoryToShowDir = false;
+
+                preferences.customRenameHistoryLocation = preferences.tvManagerPreferencesDirectory.endsWith(System.getProperty("file.separator")) ?
+                        preferences.tvManagerPreferencesDirectory + RENAME_HISTORY_FILE :
+                        preferences.tvManagerPreferencesDirectory + System.getProperty("file.separator") + RENAME_HISTORY_FILE;
+            } else if (selected != null && selected.equals(showDir)){
                 preferences.saveRenameHistoryToShowDir = true;
 
                 savePreferences();
