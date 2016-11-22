@@ -167,6 +167,11 @@ public class Renamer {
      */
     public EpisodeFile rename (EpisodeFile episodeFile) throws IOException {
         Path p = Paths.get(episodeFile.getDirectory() + System.getProperty("file.separator") + episodeFile.getNewFilename());
+
+        if (episodeFile.getNewFilename() == null || episodeFile.getNewFilename().isEmpty()){
+            return episodeFile;
+        }
+
         Files.move(episodeFile.getFile().toPath(), p);
 
         episodeFile.setFile(p.toFile());    // set filepath for the new file
@@ -200,7 +205,21 @@ public class Renamer {
             }
 
         } else {    // search using absolute number - for example with anime shows
-            return episodes.get(absoluteEpisode - 1);
+            if (episodes.size() < absoluteEpisode){ // check for out of bounds
+                String num = absoluteEpisode.toString();
+
+                // if episode num is at least three digits long, assume it's season and ep num like this: 714 for s7e14
+                if (num.length() >= 3){
+                    episode = Integer.valueOf(num.substring(num.length() - 2, num.length()));   // last two digits are episode
+                    season = Integer.valueOf(num.replace(episode + "", ""));    // all remaining digits are season
+
+                    return findEpisode(showId, season, episode, null);      // search again with new parameters
+                }
+            } else {
+                return episodes.get(absoluteEpisode - 1);
+            }
         }
+
+        return null;
     }
 }
