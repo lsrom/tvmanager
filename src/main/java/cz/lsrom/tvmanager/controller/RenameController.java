@@ -199,7 +199,7 @@ public class RenameController {
     private void startRenaming (){
         boolean interrupted = false;
         try {
-            interrupted = addingService.awaitTermination(10, TimeUnit.SECONDS);      // todo add this to preferences
+            interrupted = addingService.awaitTermination(UIStarter.preferences.awaitTermination, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             logger.error(e.getMessage());
         }
