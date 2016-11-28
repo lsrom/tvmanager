@@ -19,13 +19,14 @@ import java.io.IOException;
 public class UIStarter extends Application {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
+    // this instance of user preferences is used through out the project
     public static Preferences preferences;
 
     public static void main(String[] args) {
         if (PreferencesHandler.preferencesExist()){
             preferences = PreferencesHandler.loadPreferences();
             logger.info("Preferences loaded.");
-        } else {
+        } else {    // if no preferences were loaded, create new preferences with default values
             preferences = new Preferences();
             try {
                 PreferencesHandler.savePreferences(preferences);

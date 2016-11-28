@@ -33,7 +33,18 @@ public abstract class Parser {
         }
     }
 
-    public static EpisodeFile parse (File episodeFile){
+    /**
+     * Given File object it returns EpisodeFile object with attributes set based on parsing. Parsing is trying to get
+     * show name, season number, episode number and resolution from the file name.
+     *
+     * If null is passed, null is returned.
+     *
+     * @param episodeFile File which name will be parsed in EpisodeFile object. If it's null, method will return null as well.
+     * @return New EpisodeFile object with attributes set from parameters name or null, if passed parameter is null.
+     */
+    public static EpisodeFile parse (@NotNull File episodeFile){
+        if (episodeFile == null){return null;}
+
         String fileName = stripJunk(episodeFile.getName());     // strip junk chars and strings from filename
 
         String directory = episodeFile.getParent() == null ? "" : episodeFile.getParent();
