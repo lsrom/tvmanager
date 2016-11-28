@@ -68,12 +68,16 @@ public class Renamer {
         }
     }
 
+    /**
+     * If called, flushes rename history buffer. If buffer is not set, nothing happens.
+     */
     public void forceFlushHistory (){
-        try {
-            historyWritter.flush();
-            historyWritter.close();
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+        if (historyWritter != null){
+            try {
+                historyWritter.flush();
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
         }
     }
 
@@ -177,7 +181,7 @@ public class Renamer {
         episodeFile.setFile(p.toFile());    // set filepath for the new file
 
         if (UIStarter.preferences.saveRenameHistory){   // if user wants to save rename history
-            historyWritter.write(episodeFile.getFile().toString() + RENAME_HISTORY_SEPARATOR + p.toString());
+            historyWritter.write(episodeFile.getFile().toString() + RENAME_HISTORY_SEPARATOR + p.toString() + "\r\n");
         }
 
         return episodeFile;     // return episode with new filepath
