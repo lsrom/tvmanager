@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
@@ -23,11 +24,14 @@ import java.io.IOException;
 public class UIController {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
+    public static Label downloadedLabel;
+
     @FXML private Tab renameTab;
 
     @FXML private MenuItem btnPreferences;
     @FXML private MenuItem btnClose;
     @FXML private MenuItem btnAbout;
+    @FXML private Label labelDownloaded;
 
     private UIStarter uiStarter;
 
@@ -38,6 +42,9 @@ public class UIController {
     @FXML
     private void initialize() {
         Parent tab = null;
+
+        labelDownloaded.setText("0");
+        downloadedLabel = labelDownloaded;
 
         try {
             tab = FXMLLoader.load(this.getClass().getResource("/fxmls/automatic_rename.fxml"));

@@ -6,8 +6,11 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
+import cz.lsrom.tvmanager.UIStarter;
+import cz.lsrom.tvmanager.controller.UIController;
 import cz.lsrom.tvmanager.model.Episode;
 import cz.lsrom.tvmanager.model.Show;
+import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +62,10 @@ public class TheTVDBProvider {
 
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    private static final int kiloByte = 1024;
+    private static final int megaByte = 1024 * kiloByte;
+    private static long downloadedDataAmount;
+
     private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
 
     private TheTVDBProvider(JWTToken token) {
@@ -79,6 +86,8 @@ public class TheTVDBProvider {
         logger.debug("Logging in TheTVDB API with key: " + THETVDB_API_KEY);
         Gson gson = new Gson();
         String tokenJson = null;
+        downloadedDataAmount = 0;
+
         try {
             tokenJson = connect(LOGIN_URL, null);   // try to acquire token json
         } catch (IOException e) {
@@ -263,7 +272,11 @@ public class TheTVDBProvider {
 
         // read and parse response from TheTVDB - return string
         try (InputStream is = http.getInputStream()){
-            return getStringFromInputStream(is);
+            String res = getStringFromInputStream(is);
+
+            setDownloadedAmount(res);
+
+            return res;
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
@@ -383,9 +396,11 @@ public class TheTVDBProvider {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
+
         while ((length = inputStream.read(buffer)) != -1) {
             result.write(buffer, 0, length);
         }
+
         return result.toString("UTF-8");
     }
 
@@ -402,5 +417,23 @@ public class TheTVDBProvider {
         } else {
             return -1;
         }
+    }
+
+    private static void setDownloadedAmount (String downloadedData){
+        downloadedDataAmount += downloadedData.length();
+
+        String toDisplay = "Downloaded: ";
+
+        if (downloadedDataAmount < kiloByte){
+            toDisplay += downloadedDataAmount + " B";
+        } else if (downloadedDataAmount < megaByte){
+            //toDisplay = ((float)downloadedDataAmount / kiloByte) + " kB";
+            toDisplay += String.format("%.1f", ((float)downloadedDataAmount / kiloByte)) + " kB";
+        } else {
+            toDisplay +=  String.format("%.2f", ((float)downloadedDataAmount / megaByte))+ " MB";
+        }
+
+        final String finalToDisplay = toDisplay;
+        Platform.runLater(() -> UIController.downloadedLabel.setText(finalToDisplay));
     }
 }
