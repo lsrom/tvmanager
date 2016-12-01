@@ -165,12 +165,20 @@ public class TheTVDBProvider {
 
             for (JsonValue value : data){       // parse every episode
                 Episode e = parseJsonToEpisode(value);
-                // if episode doesn't have absolute number, than it's not show episode
-                if (e == null || e.getAbsoluteEpisodeNumber() == -1){ continue; }
-                list.add(e);
+
+                if (e != null){
+                    // don't add episodes without absolute number
+                    if ((e.getAbsoluteEpisodeNumber() != -1) && (e.getAbsoluteEpisodeNumber() != 0)){
+                        list.add(e);
+                    // unless they have set season
+                    } else if ((e.getSeason() != -1) && (e.getSeason() != 0)) {
+                        list.add(e);
+                    }
+                }
             }
         } while (!next.equals("null"));     // repeat until there is no more pages
 
+        logger.debug("Added {} episodes.", list.size());
         // sort the episode list, for easier searching
         Collections.sort(list);
 
