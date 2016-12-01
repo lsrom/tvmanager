@@ -3,10 +3,7 @@ package cz.lsrom.tvmanager.workers;
 import com.sun.istack.internal.NotNull;
 import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.controller.PreferencesController;
-import cz.lsrom.tvmanager.model.Episode;
-import cz.lsrom.tvmanager.model.EpisodeFile;
-import cz.lsrom.tvmanager.model.ReplacementToken;
-import cz.lsrom.tvmanager.model.Show;
+import cz.lsrom.tvmanager.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,32 +34,35 @@ public class Renamer {
     private static Pattern episodeNumber = Pattern.compile(".*(%\\d*e).*");
     private static Pattern episodeNumberAbs = Pattern.compile(".*(%\\d*E).*");
     private static Pattern episodeResolution = Pattern.compile(".*(%r).*");
+    
+    private Preferences preferences;
 
     private TheTVDBProvider tvdbProvider;
-
     private BufferedWriter historyWritter;
 
     /**
      * Create new Renamer object. This will login to TheTVDB.
      */
-    public Renamer() throws IOException {
+    public Renamer(Preferences preferences) throws IOException {
+        this.preferences = preferences;
+        
         tvdbProvider = TheTVDBProvider.login();
         shows = new ConcurrentHashMap<>();
         alreadyDownloaded = new ConcurrentHashMap<>();
 
-        if (UIStarter.preferences.saveRenameHistory){
-            if (UIStarter.preferences.saveRenameHistoryToShowDir){
+        if (preferences.saveRenameHistory){
+            if (preferences.saveRenameHistoryToShowDir){
                 // todo
             } else {
-                File file = new File(UIStarter.preferences.customRenameHistoryLocation);
+                File file = new File(preferences.customRenameHistoryLocation);
 
                 if (file.isFile()){
-                    historyWritter = new BufferedWriter(new FileWriter(UIStarter.preferences.customRenameHistoryLocation));
+                    historyWritter = new BufferedWriter(new FileWriter(preferences.customRenameHistoryLocation));
                 } else {
                     historyWritter = new BufferedWriter(new FileWriter(
-                            UIStarter.preferences.customRenameHistoryLocation.endsWith(System.getProperty("file.separator")) ?
-                                    UIStarter.preferences.customRenameHistoryLocation + PreferencesController.RENAME_HISTORY_FILE :
-                                    UIStarter.preferences.customRenameHistoryLocation + System.getProperty("file.separator") + PreferencesController.RENAME_HISTORY_FILE));
+                            preferences.customRenameHistoryLocation.endsWith(System.getProperty("file.separator")) ?
+                                    preferences.customRenameHistoryLocation + PreferencesController.RENAME_HISTORY_FILE :
+                                    preferences.customRenameHistoryLocation + System.getProperty("file.separator") + PreferencesController.RENAME_HISTORY_FILE));
                 }
             }
         }
@@ -180,7 +180,7 @@ public class Renamer {
 
         episodeFile.setFile(p.toFile());    // set filepath for the new file
 
-        if (UIStarter.preferences.saveRenameHistory){   // if user wants to save rename history
+        if (preferences.saveRenameHistory){   // if user wants to save rename history
             historyWritter.write(episodeFile.getFile().toString() + RENAME_HISTORY_SEPARATOR + p.toString() + "\r\n");
         }
 

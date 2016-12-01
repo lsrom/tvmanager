@@ -112,7 +112,7 @@ public class RenameController {
         Task<Renamer> createRenamerObject = new Task<Renamer>() {
             @Override
             protected Renamer call() throws Exception {
-                return new Renamer();
+                return new Renamer(preferences);
             }
         };
 
