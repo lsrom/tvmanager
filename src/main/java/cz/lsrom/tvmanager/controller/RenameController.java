@@ -47,6 +47,8 @@ import static cz.lsrom.tvmanager.UIStarter.preferences;
 public class RenameController {
     private static Logger logger = LoggerFactory.getLogger(RenameController.class);
 
+    private static String STATUS_FAILED = "Failed";
+
     @FXML private TableView showList;
     @FXML private Button btnAddFiles;
     @FXML private Button btnAddDirectories;
@@ -213,7 +215,7 @@ public class RenameController {
                 p.getKey().setNewFilename(newFilename);
                 Platform.runLater(() -> p.getValue().set(3, newFilename));
             } else {
-                Platform.runLater(() -> p.getValue().set(3, "Failed"));
+                Platform.runLater(() -> p.getValue().set(3, STATUS_FAILED));
             }
         }
 
@@ -272,8 +274,11 @@ public class RenameController {
 
             for (Pair<EpisodeFile, ObservableList<String>> p : selected.size() == 0 ? data : selected){
                 try {
-                    p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
-                    p.getValue().set(2, p.getValue().get(3));
+                    // only rename file if status is not failed
+                    if (!p.getValue().get(3).equals(STATUS_FAILED)){
+                        p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
+                        p.getValue().set(2, p.getValue().get(3));
+                    }
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                 }
