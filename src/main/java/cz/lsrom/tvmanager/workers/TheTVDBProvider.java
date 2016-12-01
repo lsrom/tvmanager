@@ -168,10 +168,10 @@ public class TheTVDBProvider {
 
                 if (e != null){
                     // don't add episodes without absolute number
-                    if ((e.getAbsoluteEpisodeNumber() != -1) && (e.getAbsoluteEpisodeNumber() != 0)){
+                    if (e.getAbsoluteEpisodeNumber() > 0){
                         list.add(e);
                     // unless they have set season
-                    } else if ((e.getSeason() != -1) && (e.getSeason() != 0)) {
+                    } else if (e.getSeason() > 0) {
                         list.add(e);
                     }
                 }
