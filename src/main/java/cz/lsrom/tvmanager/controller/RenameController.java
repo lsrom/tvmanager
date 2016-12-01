@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,7 @@ public class RenameController {
     private static Logger logger = LoggerFactory.getLogger(RenameController.class);
 
     private static String STATUS_FAILED = "Failed";
+    private static String STATUS_WORKING = "Working...";
 
     @FXML private TableView showList;
     @FXML private Button btnAddFiles;
@@ -164,7 +166,7 @@ public class RenameController {
                 row.setAll(ef.getShowName(),
                         ef.getDirectory(),
                         ef.getFile().toString().replace(ef.getDirectory() + "/", ""), // get original name
-                        "Working...");
+                        STATUS_WORKING);
 
                 if (isNewFile(f)){
                     added = data.add(new Pair<>(ef, row));
@@ -227,7 +229,7 @@ public class RenameController {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Choose Files to Rename");
             fileChooser.setInitialDirectory(new File(UIStarter.preferences.defaultFileChooserOpenLocation));
-            filesToRename = fileChooser.showOpenMultipleDialog(showList.getScene().getWindow());
+            filesToRename = getFiles(fileChooser.showOpenMultipleDialog(showList.getScene().getWindow()));
 
             populateViewWithItems();
         });
@@ -275,7 +277,7 @@ public class RenameController {
             for (Pair<EpisodeFile, ObservableList<String>> p : selected.size() == 0 ? data : selected){
                 try {
                     // only rename file if status is not failed
-                    if (!p.getValue().get(3).equals(STATUS_FAILED)){
+                    if (!p.getValue().get(3).equals(STATUS_FAILED) && !p.getValue().get(3).equals(STATUS_WORKING)){
                         p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
                         p.getValue().set(2, p.getValue().get(3));
                     }
@@ -285,7 +287,6 @@ public class RenameController {
             }
 
             renamer.forceFlushHistory();
-
             showList.refresh();
         });
     }
@@ -414,6 +415,31 @@ public class RenameController {
             } else if (path.matches(".*(" + listFilesExtension + ")$") && !path.toLowerCase().matches(".*(" + listSkipFilesContaining + ").*")){
                 // todo this check only works for Add dir - make it to work for add files as well
                 files.add(file);       // add normal file to list
+            }
+        }
+
+        return files;
+    }
+
+    /**
+     * Returns all the files that match criteria from Preferences about which files should be loaded.
+     * If given parameter is null or empty list, it returns empty list.
+     *
+     * @param list List of files from which only files matching the criteria will be returned.
+     * @return List of files matching the criteria set in Preferences.
+     */
+    private List<File> getFiles (List<File> list){
+        if (list == null || list.isEmpty()){return list;}
+
+        List<File> files = new ArrayList<>();
+
+        for (File f : list){
+            String path = f.toString();
+            if (f.isDirectory()){
+                // if file is directory, list all files from it recursively
+                files.addAll(listFilesInDir(f.toString()));
+            } else if (path.matches(".*(" + listFilesExtension + ")$") && !path.toLowerCase().matches(".*(" + listSkipFilesContaining + ").*")){
+                files.add(f);       // add normal file to list
             }
         }
 
