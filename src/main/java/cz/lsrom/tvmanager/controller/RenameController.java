@@ -413,7 +413,6 @@ public class RenameController {
                 // if file is directory, list all files from it recursively
                 files.addAll(listFilesInDir(file.toString()));
             } else if (path.matches(".*(" + listFilesExtension + ")$") && !path.toLowerCase().matches(".*(" + listSkipFilesContaining + ").*")){
-                // todo this check only works for Add dir - make it to work for add files as well
                 files.add(file);       // add normal file to list
             }
         }
