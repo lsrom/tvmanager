@@ -332,7 +332,7 @@ public class TheTVDBProvider {
         episodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
         tmp = value.asObject().get(JSON_EPISODE_DVD_NUMBER).toString();
-        dvdEpisodeNumber = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
+        dvdEpisodeNumber = tmp.equals("null") ? -1 : parseDvdEpisodeNumber(tmp);
 
         tmp = value.asObject().get(JSON_EPISODE_ABSOLUTE_NUMBER).toString();
         absoluteEpisodeNumber = tmp.equals("null") || tmp.equals("0") ? -1 : Integer.valueOf(tmp);
@@ -387,5 +387,20 @@ public class TheTVDBProvider {
             result.write(buffer, 0, length);
         }
         return result.toString("UTF-8");
+    }
+
+    /**
+     * DVD episode number can be in form of dot separated values for multipart episodes. For example: 1.1 and 1.2.
+     * Current behavior is to skip such numbers.
+     *
+     * @param dvdEpisodeNumber String with episode number to be parsed.
+     * @return DVD episode number if it is single episode or -1 for part of multipart episodes.
+     */
+    private static int parseDvdEpisodeNumber (String dvdEpisodeNumber){
+        if (dvdEpisodeNumber.matches("\\d+")){
+            return Integer.parseInt(dvdEpisodeNumber);
+        } else {
+            return -1;
+        }
     }
 }
