@@ -11,9 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -163,7 +161,8 @@ public class Renamer {
 
     /**
      * Makes the action of renaming the file. Takes the old file location from EpisodeFile and moves the file to the new location.
-     * New location is old directory followed by new filename.
+     * New location is old directory followed by new filename. If there is already a file with this name in the new
+     * location, it is replaced.
      *
      * @param episodeFile EpisodeFile with old file path to current file and new filename.
      * @return EpisodeFile with updated file path - old file is replaced with new one with new filename.
@@ -176,7 +175,7 @@ public class Renamer {
             return episodeFile;
         }
 
-        Files.move(episodeFile.getFile().toPath(), p);
+        Files.move(episodeFile.getFile().toPath(), p, StandardCopyOption.REPLACE_EXISTING);
 
         episodeFile.setFile(p.toFile());    // set filepath for the new file
 
