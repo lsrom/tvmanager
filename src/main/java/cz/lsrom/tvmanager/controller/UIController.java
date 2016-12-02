@@ -25,6 +25,7 @@ public class UIController {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
     public static Label labelDownloadStatic;
+    public static Label labelItemsStatic;
 
     @FXML private Tab renameTab;
 
@@ -32,6 +33,7 @@ public class UIController {
     @FXML private MenuItem btnClose;
     @FXML private MenuItem btnAbout;
     @FXML private Label labelDownloaded;
+    @FXML private Label labelItems;
 
     private UIStarter uiStarter;
 
@@ -44,6 +46,7 @@ public class UIController {
         Parent tab = null;
 
         labelDownloadStatic = labelDownloaded;
+        labelItemsStatic = labelItems;
 
         try {
             tab = FXMLLoader.load(this.getClass().getResource("/fxmls/automatic_rename.fxml"));
