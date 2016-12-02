@@ -4,8 +4,10 @@ import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
@@ -27,6 +29,15 @@ public abstract class FileMover {
      * @param targetPath Path to which the file is to be moved.
      */
     public static void moveFile (@NotNull final String originPath, @NotNull final String targetPath){
+        if (!Files.exists(Paths.get(targetPath))){
+            try {
+                Files.createDirectories(Paths.get(targetPath));
+
+            } catch (IOException e) {
+                logger.error(e.toString());
+            }
+        }
+
         try {
             Files.move(Paths.get(originPath), Paths.get(targetPath), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -49,8 +60,8 @@ public abstract class FileMover {
      */
     public static String getTargetPath (@NotNull String showDirPath, @NotNull String seasonFormat, final int season, @NotNull final String fileName){
         // check for file separator at the end of directory, if it's missing, add it
-        if (!showDirPath.endsWith(System.getProperty("file.separator"))){
-            showDirPath += System.getProperty("file.separator");
+        if (!showDirPath.endsWith(File.separator)){
+            showDirPath += File.separator;
         }
 
         // if seasonFormat is empty, we can return dir + filename
