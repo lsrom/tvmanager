@@ -41,6 +41,7 @@ public class PreferencesController {
     @FXML private CheckBox checkDownloadDirectory;
     @FXML private TextField txtSkipFiles;
     @FXML private Button btnSkipFiles;
+    @FXML private CheckBox checkRemoveRenamed;
 
     @FXML
     public void initialize (){
@@ -66,6 +67,19 @@ public class PreferencesController {
         initializeCheckDownloadDirectory();
         initializeBtnSkipFiles();
         initializeTxtSkipFiles();
+
+        initializeCheckRemoveRenamed();
+    }
+
+    private void initializeCheckRemoveRenamed (){
+        checkRemoveRenamed.setSelected(preferences.removeRenamedFiles);
+
+        checkRemoveRenamed.setTooltip(new Tooltip("Remove successfully renamed files from the table?"));
+
+        checkRemoveRenamed.setOnAction(event -> {
+            preferences.removeRenamedFiles = checkRemoveRenamed.isSelected();
+            savePreferences();
+        });
     }
 
     private void initializeTxtSkipFiles (){

@@ -182,6 +182,11 @@
                                           <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                                        </VBox.margin>
                                     </CheckBox>
+                                    <CheckBox fx:id="checkRemoveRenamed" mnemonicParsing="false" text="Remove renamed files from table?" VBox.vgrow="ALWAYS">
+                                       <VBox.margin>
+                                          <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                                       </VBox.margin>
+                                    </CheckBox>
                                     <HBox prefHeight="100.0" prefWidth="200.0">
                                        <children>
                                           <CheckBox fx:id="checkSaveRenameHistory" mnemonicParsing="false" text="Save rename history?">

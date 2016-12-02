@@ -35,6 +35,9 @@ public class Preferences {
     It removes all directly connected characters except spaces and all subsequent spaces replaces with single space. */
     public boolean aggressivelySkipEmptyResolutionToken = false;
 
+    /* If TRUE, then all successfully renamed files will be removed from the view. */
+    public boolean removeRenamedFiles = false;
+
     /* If TRUE then rename history is saved. Renamed history is what file was renamed to what name. */
     public boolean saveRenameHistory = false;
 
