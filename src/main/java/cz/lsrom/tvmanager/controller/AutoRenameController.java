@@ -144,19 +144,14 @@ public class AutoRenameController {
             protected List<EpisodeFile> call() throws Exception {
                 logger.debug("Parsing files.");
                 List<EpisodeFile> list = new ArrayList<>();
-                int added = 0;
 
                 for (File f : filesToRename){
                     EpisodeFile ep = Parser.parse(f);
                     list.add(ep);
                     addingService.submit(() -> renamer.addShow(ep));
-                    added++;
                 }
 
                 addingService.shutdown();
-
-                final int finalAdded = added;
-                Platform.runLater(() -> setItems(finalAdded));
 
                 logger.debug("Parsing done.");
                 return list;
@@ -184,6 +179,8 @@ public class AutoRenameController {
 
             showList.getItems().clear();
             showList.getItems().addAll(data);       // set all items to the table
+
+            setItems(data.size());
 
             if (added){
                 renamingService.submit(() -> startRenaming());
@@ -304,6 +301,8 @@ public class AutoRenameController {
         btnClearAll.setOnAction(event -> {
             showList.getItems().clear();
             data.clear();
+
+            setItems(0);    // show in status bar that there is zero items in the table
         });
     }
 
@@ -354,6 +353,8 @@ public class AutoRenameController {
                 data.removeAll(selectedItems);
 
                 showList.getItems().setAll(data);
+
+                setItems(data.size());
             }
         });
     }
