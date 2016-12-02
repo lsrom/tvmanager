@@ -1,14 +1,10 @@
 package cz.lsrom.tvmanager.workers;
 
-import cz.lsrom.tvmanager.TestInput;
 import cz.lsrom.tvmanager.model.EpisodeFile;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by lsrom on 11/9/16.
