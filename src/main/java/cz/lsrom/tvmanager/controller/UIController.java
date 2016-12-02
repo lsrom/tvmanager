@@ -42,7 +42,7 @@ public class UIController {
     @FXML
     private void initialize() {
         Parent tab = null;
-        
+
         downloadedLabel = labelDownloaded;
 
         try {
