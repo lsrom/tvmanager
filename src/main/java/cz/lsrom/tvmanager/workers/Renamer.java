@@ -180,7 +180,8 @@ public class Renamer {
 
         episodeFile.setFile(p.toFile());    // set filepath for the new file
 
-        if (preferences.saveRenameHistory){   // if user wants to save rename history
+        // if user wants to save rename history and new filename is different from old one
+        if (preferences.saveRenameHistory && !p.toString().equals(episodeFile.getFile().toString())){
             historyWritter.write(episodeFile.getFile().toString() + RENAME_HISTORY_SEPARATOR + p.toString() + "\r\n");
         }
 
