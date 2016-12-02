@@ -279,6 +279,11 @@ public class AutoRenameController {
                     if (!p.getValue().get(3).equals(STATUS_FAILED) && !p.getValue().get(3).equals(STATUS_WORKING)){
                         p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
                         p.getValue().set(2, p.getValue().get(3));
+
+                        if (preferences.removeRenamedFiles){
+                            final Pair<EpisodeFile, ObservableList<String>> finalP = p;
+                            Platform.runLater(() -> removeAndRefresh(finalP));
+                        }
                     }
                 } catch (IOException e) {
                     logger.error(e.getMessage());
@@ -288,6 +293,12 @@ public class AutoRenameController {
             renamer.forceFlushHistory();
             showList.refresh();
         });
+    }
+
+    // todo this works but the table doesnt refresh
+    private void removeAndRefresh(final Pair<EpisodeFile, ObservableList<String>> finalP){
+        data.remove(finalP);
+        showList.refresh();
     }
 
     private void initializeTable (){
