@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,8 +44,8 @@ import static cz.lsrom.tvmanager.UIStarter.preferences;
 /**
  * Created by lsrom on 11/9/16.
  */
-public class RenameController {
-    private static Logger logger = LoggerFactory.getLogger(RenameController.class);
+public class AutoRenameController {
+    private static Logger logger = LoggerFactory.getLogger(AutoRenameController.class);
 
     private static String STATUS_FAILED = "Failed";
     private static String STATUS_WORKING = "Working...";
