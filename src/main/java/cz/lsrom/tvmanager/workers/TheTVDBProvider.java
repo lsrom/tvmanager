@@ -356,8 +356,11 @@ public class TheTVDBProvider {
         dvdSeason = tmp.equals("null") ? -1 : Integer.valueOf(tmp);
 
         obj = value.asObject().get(JSON_EPISODE_OVERVIEW);
-        if (obj.isNull()){return null;}
-        overview = obj.asString().trim();
+        if (obj.isNull()){
+            overview = "";
+        } else {
+            overview = obj.asString().trim();
+        }
 
         tmp = value.asObject().get(JSON_EPISODE_AIRDATE).asString().replaceAll("\\\"", "");
         try {
