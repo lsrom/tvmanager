@@ -64,7 +64,6 @@ public class TheTVDBProvider {
 
     private static final int kiloByte = 1024;
     private static final int megaByte = 1024 * kiloByte;
-    private static long downloadedDataAmount;
 
     private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
 
@@ -86,7 +85,6 @@ public class TheTVDBProvider {
         logger.debug("Logging in TheTVDB API with key: " + THETVDB_API_KEY);
         Gson gson = new Gson();
         String tokenJson = null;
-        downloadedDataAmount = 0;
 
         try {
             tokenJson = connect(LOGIN_URL, null);   // try to acquire token json
@@ -274,7 +272,7 @@ public class TheTVDBProvider {
         try (InputStream is = http.getInputStream()){
             String res = getStringFromInputStream(is);
 
-            setDownloadedAmount(res);
+            setDownloadedAmount(res.length());
 
             return res;
         } catch (IOException e) {
@@ -419,21 +417,32 @@ public class TheTVDBProvider {
         }
     }
 
-    private static void setDownloadedAmount (String downloadedData){
-        downloadedDataAmount += downloadedData.length();
+    /**
+     * This method shows the amount of downloaded data. If the UI is not started or label which should display
+     * this value is not initialized (is null) this method does nothing. Also, if passed argument is lower than zero,
+     * method ends.
+     *
+     * If label is initialized, amount of downloaded data will be displayed in human readable format: If less than
+     * kilobyte, than number of bytes is shown with trailing B. If less than megabyte, number of kilobytes with one
+     * decimal point precision is shown with trailing kB. And above this, number of megabytes on two decimal places is
+     * shown.
+     *
+     * @param downloadedDataLength Length of downloaded data.
+     */
+    private static void setDownloadedAmount (int downloadedDataLength){
+        if (UIController.downloadedLabel == null || downloadedDataLength < 0){return;}  // if UI is not initialized, skip this method
 
-        String toDisplay = "Downloaded: ";
+        String toDisplay = "Downloaded: ";  // this string will have amount of downloaded data in pretty format (kB/MB)
 
-        if (downloadedDataAmount < kiloByte){
-            toDisplay += downloadedDataAmount + " B";
-        } else if (downloadedDataAmount < megaByte){
-            //toDisplay = ((float)downloadedDataAmount / kiloByte) + " kB";
-            toDisplay += String.format("%.1f", ((float)downloadedDataAmount / kiloByte)) + " kB";
+        if (downloadedDataLength < kiloByte){
+            toDisplay += downloadedDataLength + " B";
+        } else if (downloadedDataLength < megaByte){
+            toDisplay += String.format("%.1f", ((float)downloadedDataLength / kiloByte)) + " kB";
         } else {
-            toDisplay +=  String.format("%.2f", ((float)downloadedDataAmount / megaByte))+ " MB";
+            toDisplay +=  String.format("%.2f", ((float)downloadedDataLength / megaByte))+ " MB";
         }
 
-        final String finalToDisplay = toDisplay;
+        final String finalToDisplay = toDisplay;    // variable for lambda must be final
         Platform.runLater(() -> UIController.downloadedLabel.setText(finalToDisplay));
     }
 }
