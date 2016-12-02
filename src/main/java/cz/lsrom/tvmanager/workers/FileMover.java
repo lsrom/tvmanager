@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Created by lsrom on 12/2/16.
  */
-public class FileMover {
+public abstract class FileMover {
     private static Logger logger = LoggerFactory.getLogger(FileMover.class);
 
     private static Pattern seasonNumber = Pattern.compile(".*(%\\d*s).*");
