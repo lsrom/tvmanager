@@ -24,7 +24,7 @@ import java.io.IOException;
 public class UIController {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
-    public static Label downloadedLabel;
+    public static Label labelDownloadStatic;
 
     @FXML private Tab renameTab;
 
@@ -43,7 +43,7 @@ public class UIController {
     private void initialize() {
         Parent tab = null;
 
-        downloadedLabel = labelDownloaded;
+        labelDownloadStatic = labelDownloaded;
 
         try {
             tab = FXMLLoader.load(this.getClass().getResource("/fxmls/automatic_rename.fxml"));

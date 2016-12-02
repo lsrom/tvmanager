@@ -6,7 +6,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
-import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.controller.UIController;
 import cz.lsrom.tvmanager.model.Episode;
 import cz.lsrom.tvmanager.model.Show;
@@ -432,7 +431,7 @@ public class TheTVDBProvider {
      * @param downloadedDataLength Length of downloaded data.
      */
     private static void setDownloadedAmount (int downloadedDataLength){
-        if (UIController.downloadedLabel == null || downloadedDataLength < 0){return;}  // if UI is not initialized, skip this method
+        if (UIController.labelDownloadStatic == null || downloadedDataLength < 0){return;}  // if UI is not initialized, skip this method
 
         downloaded += downloadedDataLength;
 
@@ -447,6 +446,6 @@ public class TheTVDBProvider {
         }
 
         final String finalToDisplay = toDisplay;    // variable for lambda must be final
-        Platform.runLater(() -> UIController.downloadedLabel.setText(finalToDisplay));
+        Platform.runLater(() -> UIController.labelDownloadStatic.setText(finalToDisplay));
     }
 }
