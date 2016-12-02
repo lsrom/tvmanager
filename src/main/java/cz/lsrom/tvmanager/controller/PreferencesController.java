@@ -82,12 +82,15 @@ public class PreferencesController {
         checkMoveAfterRename.setSelected(preferences.moveAfterRename);
 
         checkMoveAfterRename.setTooltip(new Tooltip("Move renamed files to: " +
-                preferences.tvShowDirectory + System.getProperty("file.separator") +
-                "ShowName" + System.getProperty("file.separator") + preferences.seasonFormat));
+                preferences.tvShowDirectory + File.separator +
+                "ShowName" + File.separator + preferences.seasonFormat));
 
         checkMoveAfterRename.setOnAction(event -> {
             preferences.moveAfterRename = checkMoveAfterRename.isSelected();
             savePreferences();
+
+            txtMoveAfterRename.setDisable(!checkMoveAfterRename.isSelected());
+            btnMoveAfterRename.setDisable(!checkMoveAfterRename.isSelected());
         });
     }
 
@@ -169,9 +172,9 @@ public class PreferencesController {
             directoryChooser.setTitle("Choose your download location.");
             File dir = directoryChooser.showDialog(btnChooseDefaultOpenLocation.getScene().getWindow());
 
-            txtDownloadDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+            txtDownloadDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString() + File.separator);
 
-            preferences.tvShowDownloadDirectory = dir == null ? "" : dir.getAbsolutePath().toString();
+            preferences.tvShowDownloadDirectory = dir == null ? "" : dir.getAbsolutePath().toString() + File.separator;
 
             if (!preferences.tvShowDownloadDirectory.isEmpty()){
                 checkDownloadDirectory.setDisable(false);
@@ -235,7 +238,7 @@ public class PreferencesController {
             directoryChooser.setTitle("Choose default location for file chooser.");
             File dir = directoryChooser.showDialog(btnChoseTvDirectory.getScene().getWindow());
 
-            txtTvDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString());
+            txtTvDirectory.setText(dir == null ? "" : dir.getAbsolutePath().toString() + File.separator);
 
             preferences.tvShowDirectory = dir == null ? "" : dir.getAbsolutePath().toString();
             savePreferences();
@@ -278,9 +281,9 @@ public class PreferencesController {
             if (selected != null && selected.equals(defaultLocation)){
                 preferences.saveRenameHistoryToShowDir = false;
 
-                preferences.customRenameHistoryLocation = preferences.tvManagerPreferencesDirectory.endsWith(System.getProperty("file.separator")) ?
+                preferences.customRenameHistoryLocation = preferences.tvManagerPreferencesDirectory.endsWith(File.separator) ?
                         preferences.tvManagerPreferencesDirectory + RENAME_HISTORY_FILE :
-                        preferences.tvManagerPreferencesDirectory + System.getProperty("file.separator") + RENAME_HISTORY_FILE;
+                        preferences.tvManagerPreferencesDirectory + File.separator + RENAME_HISTORY_FILE;
             } else if (selected != null && selected.equals(showDir)){
                 preferences.saveRenameHistoryToShowDir = true;
 
