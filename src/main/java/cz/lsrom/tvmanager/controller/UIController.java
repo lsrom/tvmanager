@@ -24,8 +24,8 @@ import java.io.IOException;
 public class UIController {
     private static Logger logger = LoggerFactory.getLogger(UIStarter.class);
 
-    public static Label labelDownloadStatic;
-    public static Label labelItemsStatic;
+    public static Label labelDownloadStatic = null;
+    public static Label labelItemsStatic = null;
 
     @FXML private Tab renameTab;
 
