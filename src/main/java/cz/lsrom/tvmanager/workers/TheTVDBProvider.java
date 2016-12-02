@@ -65,6 +65,8 @@ public class TheTVDBProvider {
     private static final int kiloByte = 1024;
     private static final int megaByte = 1024 * kiloByte;
 
+    private static long downloaded = 0;
+
     private JWTToken token;     // token acquired through authentication with TheTVDB API - must be included in all request
 
     private TheTVDBProvider(JWTToken token) {
@@ -432,14 +434,16 @@ public class TheTVDBProvider {
     private static void setDownloadedAmount (int downloadedDataLength){
         if (UIController.downloadedLabel == null || downloadedDataLength < 0){return;}  // if UI is not initialized, skip this method
 
+        downloaded += downloadedDataLength;
+
         String toDisplay = "Downloaded: ";  // this string will have amount of downloaded data in pretty format (kB/MB)
 
-        if (downloadedDataLength < kiloByte){
-            toDisplay += downloadedDataLength + " B";
-        } else if (downloadedDataLength < megaByte){
-            toDisplay += String.format("%.1f", ((float)downloadedDataLength / kiloByte)) + " kB";
+        if (downloaded < kiloByte){
+            toDisplay += downloaded + " B";
+        } else if (downloaded < megaByte){
+            toDisplay += String.format("%.1f", ((float)downloaded / kiloByte)) + " kB";
         } else {
-            toDisplay +=  String.format("%.2f", ((float)downloadedDataLength / megaByte))+ " MB";
+            toDisplay +=  String.format("%.2f", ((float)downloaded / megaByte))+ " MB";
         }
 
         final String finalToDisplay = toDisplay;    // variable for lambda must be final
