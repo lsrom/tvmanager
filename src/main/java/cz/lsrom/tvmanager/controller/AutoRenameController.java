@@ -91,6 +91,7 @@ public class AutoRenameController {
         txtReplacementString.setText(UIStarter.preferences.replacementString);
 
         initializeKeyboardShortcuts();
+        initializeLabelItems();
 
         // create regex with supported file extensions - these will be loaded
         StringBuilder stringBuilder = new StringBuilder();
@@ -126,6 +127,10 @@ public class AutoRenameController {
         theTvdbLogin.start();
     }
 
+    private void initializeLabelItems (){
+        setItems(data.size());
+    }
+
     private void populateViewWithItems (){
         if (filesToRename == null || filesToRename.isEmpty()){
             return;
@@ -139,14 +144,19 @@ public class AutoRenameController {
             protected List<EpisodeFile> call() throws Exception {
                 logger.debug("Parsing files.");
                 List<EpisodeFile> list = new ArrayList<>();
+                int added = 0;
 
                 for (File f : filesToRename){
                     EpisodeFile ep = Parser.parse(f);
                     list.add(ep);
                     addingService.submit(() -> renamer.addShow(ep));
+                    added++;
                 }
 
                 addingService.shutdown();
+
+                final int finalAdded = added;
+                Platform.runLater(() -> setItems(finalAdded));
 
                 logger.debug("Parsing done.");
                 return list;
@@ -184,6 +194,34 @@ public class AutoRenameController {
         Thread episodeGetter = new Thread(getEpisodeFiles);     // create new thread with the task
         episodeGetter.setDaemon(true);
         episodeGetter.start();
+    }
+
+    /**
+     * Shows the amount of added files in the status bar. If passed number is lower then zero, method ends without any
+     * effect.
+     *
+     * @param amount How many files are in the table.
+     */
+    private void setItems (int amount){
+        if (UIController.labelItemsStatic == null){return;} // check if UI is initialized
+        if (amount < 0){return;}    // we don't want to set negative value
+
+        UIController.labelItemsStatic.setText(amount + " items");
+        UIController.labelItemsStatic.setTooltip(new Tooltip("There is " + amount + " items in the table."));
+    }
+
+    /**
+     * Shows the number of successfully renamed files in the status bar. If passed number is lower then zero, methods ends
+     * without any effect.
+     *
+     * @param amount How many files was successfully renamed.
+     */
+    private void setRenamed (int amount){
+        if (UIController.labelItemsStatic == null){return;} // check if UI is initialized
+        if (amount < 0){return;}    // we don't want to set negative value
+
+        UIController.labelItemsStatic.setText(amount + " renamed");
+        UIController.labelItemsStatic.setTooltip(new Tooltip(amount + " items successfully renamed, out of " + data.size()));
     }
 
     private boolean isNewFile (File file){
@@ -272,6 +310,7 @@ public class AutoRenameController {
     private void initializeBtnRename (){
         btnRename.setOnAction(event -> {
             ObservableList<Pair<EpisodeFile, ObservableList<String>>> selected = showList.getSelectionModel().getSelectedItems();
+            int successfullyRenamed = 0;
 
             for (Pair<EpisodeFile, ObservableList<String>> p : selected.size() == 0 ? data : selected){
                 try {
@@ -280,11 +319,14 @@ public class AutoRenameController {
                         p = new Pair<>(renamer.rename(p.getKey()), p.getValue());
                         p.getValue().set(2, p.getValue().get(3));
 
+                        successfullyRenamed++;
+
                         if (preferences.removeRenamedFiles){
                             final Pair<EpisodeFile, ObservableList<String>> finalP = p;
                             Platform.runLater(() -> removeAndRefresh(finalP));
                         }
                     }
+                    setRenamed(successfullyRenamed);
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                 }
