@@ -3,6 +3,7 @@ package cz.lsrom.tvmanager.controller;
 import cz.lsrom.tvmanager.UIStarter;
 import cz.lsrom.tvmanager.model.EpisodeFile;
 import cz.lsrom.tvmanager.model.PreferencesHandler;
+import cz.lsrom.tvmanager.workers.FileMover;
 import cz.lsrom.tvmanager.workers.Parser;
 import cz.lsrom.tvmanager.workers.Renamer;
 import javafx.application.Platform;
@@ -319,6 +320,16 @@ public class AutoRenameController {
                         p.getValue().set(2, p.getValue().get(3));
 
                         successfullyRenamed++;
+
+                        if (preferences.moveAfterRename){
+                            FileMover.moveFile(
+                                    p.getKey().getFile().getPath(),
+                                    FileMover.getTargetPath(preferences.tvShowDirectory + p.getKey().getShowName(),
+                                            preferences.seasonFormat,
+                                            p.getKey().getSeason(),
+                                            p.getKey().getNewFilename())
+                            );
+                        }
 
                         if (preferences.removeRenamedFiles){
                             final Pair<EpisodeFile, ObservableList<String>> finalP = p;
