@@ -1,6 +1,5 @@
 package cz.lsrom.tvmanager.controller;
 
-import com.eclipsesource.json.Json;
 import cz.lsrom.tvmanager.model.PreferencesHandler;
 import cz.lsrom.tvmanager.model.ReplacementToken;
 import javafx.fxml.FXML;
@@ -42,6 +41,9 @@ public class PreferencesController {
     @FXML private TextField txtSkipFiles;
     @FXML private Button btnSkipFiles;
     @FXML private CheckBox checkRemoveRenamed;
+    @FXML private CheckBox checkMoveAfterRename;
+    @FXML private TextField txtMoveAfterRename;
+    @FXML private Button btnMoveAfterRename;
 
     @FXML
     public void initialize (){
@@ -69,6 +71,42 @@ public class PreferencesController {
         initializeTxtSkipFiles();
 
         initializeCheckRemoveRenamed();
+
+        initializeBtnMoveAfterRename();
+        initializeCheckMoveAfterRename();
+        initializeTxtMoveAfterRename();
+    }
+
+    private void initializeCheckMoveAfterRename (){
+        checkMoveAfterRename.setDisable(preferences.tvShowDirectory.isEmpty());
+        checkMoveAfterRename.setSelected(preferences.moveAfterRename);
+
+        checkMoveAfterRename.setTooltip(new Tooltip("Move renamed files to: " +
+                preferences.tvShowDirectory + System.getProperty("file.separator") +
+                "ShowName" + System.getProperty("file.separator") + preferences.seasonFormat));
+
+        checkMoveAfterRename.setOnAction(event -> {
+            preferences.moveAfterRename = checkMoveAfterRename.isSelected();
+            savePreferences();
+        });
+    }
+
+    private void initializeTxtMoveAfterRename (){
+        txtMoveAfterRename.setDisable(!preferences.moveAfterRename);
+        txtMoveAfterRename.setText(preferences.seasonFormat);
+
+        txtMoveAfterRename.setTooltip(new Tooltip("Beginning of the season directory name. If empty, " +
+                "all episodes in this season will be placed directly into the show directory.\r\n" +
+                "For season number you can use the same format as in replacement pattern (%2s for example)."));
+    }
+
+    private void initializeBtnMoveAfterRename (){
+        btnMoveAfterRename.setDisable(!preferences.moveAfterRename);
+
+        btnMoveAfterRename.setOnAction(event -> {
+            preferences.seasonFormat = txtMoveAfterRename.getText();
+            savePreferences();
+        });
     }
 
     private void initializeCheckRemoveRenamed (){
@@ -337,8 +375,7 @@ public class PreferencesController {
 
     private void initializeBtnRenameFormat (){
         btnRenameFormat.setOnAction(event -> {
-            String replacementString = txtRenameFormat.getText();
-            preferences.replacementString = replacementString;
+            preferences.replacementString = txtRenameFormat.getText();
 
             savePreferences();
         });

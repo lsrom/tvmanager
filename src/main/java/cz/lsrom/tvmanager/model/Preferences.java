@@ -35,6 +35,12 @@ public class Preferences {
     It removes all directly connected characters except spaces and all subsequent spaces replaces with single space. */
     public boolean aggressivelySkipEmptyResolutionToken = false;
 
+    /* If TRUE, successfully renamed files will be moved to tvShowDirectory, in show subdirectory and to separate
+     * season directories, if they are set. */
+    public boolean moveAfterRename = false;
+
+    public String seasonFormat = "Season %2s";
+
     /* If TRUE, then all successfully renamed files will be removed from the view. */
     public boolean removeRenamedFiles = false;
 
