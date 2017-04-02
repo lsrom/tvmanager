@@ -58,6 +58,63 @@ public class RenamerTest {
         }
     }
 
+    @Test
+    public void testAddShowWhichNeedsOneRetry (){
+        EpisodeFile ef = new EpisodeFile(
+                "Naruto Shippuuden 006",
+                "79824",
+                1,
+                6,
+                "",
+                "",
+                new File("naruto.mkv")
+        );
+
+        renamer.addShow(ef);
+
+        String newFilename = renamer.getNewFileName(ef, renameStringPadding1);
+
+        assertEquals("Naruto Shippuuden s1e6 Mission Cleared.mkv", newFilename);
+    }
+
+    @Test
+    public void testAddShowWhichNeedsTwoRetries (){
+        EpisodeFile ef = new EpisodeFile(
+                "Naruto Shippuuden 006 02",
+                "79824",
+                1,
+                6,
+                "",
+                "",
+                new File("naruto.mkv")
+        );
+
+        renamer.addShow(ef);
+
+        String newFilename = renamer.getNewFileName(ef, renameStringPadding1);
+
+        assertEquals("Naruto Shippuuden s1e6 Mission Cleared.mkv", newFilename);
+    }
+
+    @Test
+    public void testAddShowWhichNeedsThreeRetries (){
+        EpisodeFile ef = new EpisodeFile(
+                "Naruto Shippuuden 006 03 00",
+                "79824",
+                1,
+                6,
+                "",
+                "",
+                new File("naruto.mkv")
+        );
+
+        renamer.addShow(ef);
+
+        String newFilename = renamer.getNewFileName(ef, renameStringPadding1);
+
+        assertEquals("Naruto Shippuuden s1e6 Mission Cleared.mkv", newFilename);
+    }
+
     private class TestInput {
         public final EpisodeFile episodeFile;
         public final String expectedFileName;

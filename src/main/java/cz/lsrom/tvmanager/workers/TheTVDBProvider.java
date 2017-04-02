@@ -117,8 +117,6 @@ public class TheTVDBProvider {
         try {
             String urlEncodeShow = URLEncoder.encode(showTitle.toLowerCase(), "UTF-8");     // encode show title in lowercase
             showResult = connect(SEARCH_FOR_SHOW_URL + urlEncodeShow, token.getToken());    // get JSON response
-        } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage());
         }

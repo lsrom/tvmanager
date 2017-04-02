@@ -94,6 +94,17 @@ public class Renamer {
         logger.debug("Adding new show {}.", episodeFile.getShowName());
 
         Show s = tvdbProvider.searchForShow(episodeFile.getShowName());     // search for the show with it's name parsed from the file
+        String showTitle = episodeFile.getShowName();
+        int count = 0;
+        while (s == null){
+            s= tvdbProvider.searchForShow((showTitle = showTitle.substring(0, showTitle.lastIndexOf(" "))));
+            logger.debug(showTitle);
+            count++;
+            if (count >= preferences.maxShowNameRetries){break;}    // so we don't loop forever
+        }
+
+        episodeFile.setShowName(showTitle);
+
         s.setEpisodes(tvdbProvider.getAllEpisodesForShow(s.getId()));       // now get all episodes for the show
         episodeFile.setShowId(s.getId());
 
