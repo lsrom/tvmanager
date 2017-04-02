@@ -56,6 +56,9 @@ public class Preferences {
     /* How long should program wait for TheTVDB show results. */
     public int awaitTermination = 15;
 
+    /* How many times to try new variants of show name. */
+    public int maxShowNameRetries = 3;
+
     public Preferences() {
     }
 }
