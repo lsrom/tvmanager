@@ -163,6 +163,7 @@ public class Renamer {
         }
 
         tmp = tmp.replace(ReplacementToken.EPISODE_TITLE.getToken(), episode.getTitle());   // set episode title
+        tmp = removeUnallowedCharacters(tmp);
 
         String ext = episodeFile.getFile().getName();   // get old filename
         ext = ext.substring(ext.lastIndexOf("."));      // and extract it's file extension from it
@@ -236,5 +237,15 @@ public class Renamer {
         }
 
         return null;
+    }
+
+    /**
+     * Removes characters that are not allowed in the filename.
+     *
+     * @param filename String with filename to be cleared from un-allowed characters.
+     * @return String without un-allowed characters.
+     */
+    private String removeUnallowedCharacters (@NotNull String filename){
+        return filename.replaceAll("[\\?!,:]", "");
     }
 }
